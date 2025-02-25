@@ -99,7 +99,7 @@ class Route:
     for f in files:
       fullpath = os.path.join(data_dir, f)
       explorer_match = re.match(RE.EXPLORER_FILE, f)
-      op_match = re.match(RE.OP_SEGMENT_DIR, f)
+      op_match = re.match(RE.OP_SEGMENT_DIR, "a2a0ccea32023010|"+f)
 
       if explorer_match:
         segment_name = explorer_match.group('segment_name')
