@@ -371,7 +371,8 @@ class SelfdriveD(CruiseHelper):
       # Not show in first 1.5 km to allow for driving out of garage. This event shows after 5 minutes
       gps_ok = self.sm.recv_frame[self.gps_location_service] > 0 and (self.sm.frame - self.sm.recv_frame[self.gps_location_service]) * DT_CTRL < 2.0
       if not gps_ok and self.sm['livePose'].inputsOK and (self.distance_traveled > 1500):
-        self.events.add(EventName.noGps)
+        pass
+        # self.events.add(EventName.noGps)
       if gps_ok:
         self.distance_traveled = 0
       self.distance_traveled += abs(CS.vEgo) * DT_CTRL
