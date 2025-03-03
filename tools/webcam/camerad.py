@@ -6,7 +6,7 @@ from collections import namedtuple
 from msgq.visionipc import VisionIpcServer, VisionStreamType
 from cereal import messaging
 
-from openpilot.tools.webcam.camera import Camera, CameraMJPG
+from openpilot.tools.webcam.camera import Camera, CameraMJPG, CameraFastMJPG
 from openpilot.common.realtime import Ratekeeper
 
 WIDE_CAM = os.getenv("WIDE_CAM")
@@ -27,7 +27,7 @@ class Camerad:
     for c in CAMERAS:
       cam_device = f"/dev/video{c.cam_id}"
       print(f"opening {c.msg_name} at {cam_device}")
-      cam = CameraMJPG(c.msg_name, c.stream_type, cam_device)
+      cam = CameraFastMJPG(c.msg_name, c.stream_type, cam_device)
       self.cameras.append(cam)
       self.vipc_server.create_buffers(c.stream_type, 20, cam.W, cam.H)
 
