@@ -46,6 +46,10 @@ class CameraMJPG:
         print("数据格式: ", actual_format)
         # 若 MJPG 不支持，回退默认
 
+        # 获取实际设置的FPS并打印
+        self.fps = self.cap.get(cv2.CAP_PROP_FPS)
+        print(f"摄像头初始化后的FPS设置: {self.fps}")
+
 
         # 获取分辨率
         self.W = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -62,7 +66,7 @@ class CameraMJPG:
         self.cap.set(cv2.CAP_PROP_FOURCC, fourcc)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # 优先选择最高分辨率
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        self.cap.set(cv2.CAP_PROP_FPS, 20)
 
 
     def _get_current_format(self):
