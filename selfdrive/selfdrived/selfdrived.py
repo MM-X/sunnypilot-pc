@@ -73,7 +73,7 @@ class SelfdriveD(CruiseHelper):
     self.gps_location_service = get_gps_location_service(self.params)
     self.gps_packets = [self.gps_location_service]
     self.sensor_packets = ["accelerometer", "gyroscope"]
-    self.camera_packets = ["roadCameraState", "driverCameraState", "wideRoadCameraState"]
+    self.camera_packets = ["roadCameraState", "wideRoadCameraState"]
 
     # TODO: de-couple selfdrived with card/conflate on carState without introducing controls mismatches
     self.car_state_sock = messaging.sub_sock('carState', timeout=20)
@@ -85,7 +85,7 @@ class SelfdriveD(CruiseHelper):
       # no vipc in replay will make them ignored anyways
       ignore += ['roadCameraState', 'wideRoadCameraState']
     self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
-                                   'carOutput', 'driverMonitoringState', 'longitudinalPlan', 'livePose', 'liveDelay',
+                                   'carOutput', 'longitudinalPlan', 'livePose', 'liveDelay',
                                    'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters',
                                    'controlsState', 'carControl', 'driverAssistance', 'alertDebug', 'userFlag'] + \
                                    self.camera_packets + self.sensor_packets + self.gps_packets,
@@ -130,7 +130,7 @@ class SelfdriveD(CruiseHelper):
     # cause loggerd to crash on write, so ignore it only on that platform
     self.ignored_processes = set()
     if HARDWARE.get_device_type() == 'tici' and os.path.exists('/dev/nvme0'):
-      self.ignored_processes = {'loggerd', }
+      self.ignored_processes = {'loggerd', 'dmonitoringmodeld', 'dmonitoringd'}
 
     # Determine startup event
     self.startup_event = EventName.startup if build_metadata.openpilot.comma_remote and build_metadata.tested_channel else EventName.startupMaster
@@ -193,8 +193,8 @@ class SelfdriveD(CruiseHelper):
     if not self.CP.pcmCruise and CS.vCruise > 250 and resume_pressed:
       self.events.add(EventName.resumeBlocked)
 
-    if not self.CP.notCar:
-      self.events.add_from_msg(self.sm['driverMonitoringState'].events)
+    # if not self.CP.notCar:
+    #   self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
     # Add car events, ignore if CAN isn't valid
     if CS.canValid:
