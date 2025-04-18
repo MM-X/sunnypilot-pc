@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from cereal import custom
-from openpilot.sunnypilot.modeld_v2 import MODEL_PATH, MODEL_PKL_PATH, METADATA_PATH
+from openpilot.sunnypilot.modeld_v2 import MODEL_PATH, MODEL_PKL_PATH, METADATA_PATH, MODEL_RKNN_PATH
 from openpilot.sunnypilot.modeld_v2.models.commonmodel_pyx import DrivingModelFrame, CLMem
 from openpilot.sunnypilot.modeld_v2.runners.ort_helpers import make_onnx_cpu_runner, ORT_TYPES_TO_NP_TYPES
 from openpilot.sunnypilot.modeld_v2.runners.tinygrad_helpers import qcom_tensor_from_opencl_address
@@ -13,6 +13,8 @@ from openpilot.system.hardware.hw import Paths
 
 from openpilot.sunnypilot.models.helpers import get_active_bundle
 from tinygrad.tensor import Tensor
+
+from rknnlite.api import RKNNLite
 
 if TICI:
   os.environ['QCOM'] = '1'
@@ -132,3 +134,25 @@ class ONNXRunner(ModelRunner):
 
   def run_model(self):
     return self.runner.run(None, self.inputs)[0].flatten()
+
+class RKNNRunner(ModelRunner):
+  """ONNX implementation of model runner for non-TICI hardware."""
+
+  def __init__(self):
+    super().__init__()
+    self.is_20hz = True
+    self.runner = RKNNLite(verbose=False)
+    self.runner.load_rknn(str(MODEL_RKNN_PATH))
+    self.runner.init_runtime(core_mask=RKNNLite.NPU_CORE_ALL)
+    self.keys = ['input_imgs', 'big_input_imgs', 'desire', 'traffic_convention', 'lateral_control_params', 'prev_desired_curv', 'features_buffer']
+
+  def prepare_inputs(self, imgs_cl: dict[str, CLMem], numpy_inputs: dict[str, np.ndarray], frames: dict[str, DrivingModelFrame]) -> dict:
+    self.inputs = numpy_inputs
+    for key in imgs_cl:
+      self.inputs[key] = frames[key].buffer_from_cl(imgs_cl[key]).reshape(self.input_shapes[key]).astype(np.float32)
+    return self.inputs
+
+  def run_model(self):
+    model_output = self.runner.inference(inputs=[self.inputs[key] for key in self.keys], data_format=None)
+    return model_output[0].flatten()
+
