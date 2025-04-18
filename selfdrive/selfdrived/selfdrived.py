@@ -31,7 +31,7 @@ from openpilot.sunnypilot.selfdrive.selfdrived.events import EventsSP
 REPLAY = "REPLAY" in os.environ
 SIMULATION = "SIMULATION" in os.environ
 TESTING_CLOSET = "TESTING_CLOSET" in os.environ
-IGNORE_PROCESSES = {"loggerd", "encoderd", "statsd"}
+IGNORE_PROCESSES = {"loggerd", "encoderd", "statsd", "ui"}
 LONGITUDINAL_PERSONALITY_MAP = {v: k for k, v in log.LongitudinalPersonality.schema.enumerants.items()}
 
 ThermalStatus = log.DeviceState.ThermalStatus

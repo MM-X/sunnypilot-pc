@@ -30,11 +30,14 @@ from openpilot.selfdrive.modeld.parse_model_outputs import Parser
 from openpilot.selfdrive.modeld.fill_model_msg import fill_model_msg, fill_pose_msg, PublishState
 from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.selfdrive.modeld.models.commonmodel_pyx import DrivingModelFrame, CLContext
+from rknnlite.api import RKNNLite
 
 
 PROCESS_NAME = "selfdrive.modeld.modeld"
 SEND_RAW_PRED = os.getenv('SEND_RAW_PRED')
 
+VISION_RKNN_PATH = Path(__file__).parent / 'models/driving_vision.rknn'
+POLICY_RKNN_PATH = Path(__file__).parent / 'models/driving_policy.rknn'
 VISION_PKL_PATH = Path(__file__).parent / 'models/driving_vision_tinygrad.pkl'
 POLICY_PKL_PATH = Path(__file__).parent / 'models/driving_policy_tinygrad.pkl'
 VISION_METADATA_PATH = Path(__file__).parent / 'models/driving_vision_metadata.pkl'
@@ -60,20 +63,20 @@ class ModelState:
       'input_imgs': DrivingModelFrame(context, ModelConstants.TEMPORAL_SKIP),
       'big_input_imgs': DrivingModelFrame(context, ModelConstants.TEMPORAL_SKIP)
     }
-    self.prev_desire = np.zeros(ModelConstants.DESIRE_LEN, dtype=np.float32)
+    self.prev_desire = np.zeros(ModelConstants.DESIRE_LEN, dtype=np.float16)
 
-    self.full_features_buffer = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN,  ModelConstants.FEATURE_LEN), dtype=np.float32)
-    self.full_desire = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN, ModelConstants.DESIRE_LEN), dtype=np.float32)
-    self.full_prev_desired_curv = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN, ModelConstants.PREV_DESIRED_CURV_LEN), dtype=np.float32)
+    self.full_features_buffer = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN,  ModelConstants.FEATURE_LEN), dtype=np.float16)
+    self.full_desire = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN, ModelConstants.DESIRE_LEN), dtype=np.float16)
+    self.full_prev_desired_curv = np.zeros((1, ModelConstants.FULL_HISTORY_BUFFER_LEN, ModelConstants.PREV_DESIRED_CURV_LEN), dtype=np.float16)
     self.temporal_idxs = slice(-1-(ModelConstants.TEMPORAL_SKIP*(ModelConstants.INPUT_HISTORY_BUFFER_LEN-1)), None, ModelConstants.TEMPORAL_SKIP)
 
     # policy inputs
     self.numpy_inputs = {
-      'desire': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN, ModelConstants.DESIRE_LEN), dtype=np.float32),
-      'traffic_convention': np.zeros((1, ModelConstants.TRAFFIC_CONVENTION_LEN), dtype=np.float32),
-      'lateral_control_params': np.zeros((1, ModelConstants.LATERAL_CONTROL_PARAMS_LEN), dtype=np.float32),
-      'prev_desired_curv': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN, ModelConstants.PREV_DESIRED_CURV_LEN), dtype=np.float32),
-      'features_buffer': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN,  ModelConstants.FEATURE_LEN), dtype=np.float32),
+      'desire': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN, ModelConstants.DESIRE_LEN), dtype=np.float16),
+      'traffic_convention': np.zeros((1, ModelConstants.TRAFFIC_CONVENTION_LEN), dtype=np.float16),
+      'lateral_control_params': np.zeros((1, ModelConstants.LATERAL_CONTROL_PARAMS_LEN), dtype=np.float16),
+      'prev_desired_curv': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN, ModelConstants.PREV_DESIRED_CURV_LEN), dtype=np.float16),
+      'features_buffer': np.zeros((1, ModelConstants.INPUT_HISTORY_BUFFER_LEN,  ModelConstants.FEATURE_LEN), dtype=np.float16),
     }
 
     with open(VISION_METADATA_PATH, 'rb') as f:
@@ -89,17 +92,29 @@ class ModelState:
       policy_output_size = policy_metadata['output_shapes']['outputs'][1]
 
     # img buffers are managed in openCL transform code
-    self.vision_inputs: dict[str, Tensor] = {}
+    if TICI:
+      self.vision_inputs: dict[str, Tensor] = {}
+    else:
+      self.vision_inputs: dict[str, np.ndarray] = {}
     self.vision_output = np.zeros(vision_output_size, dtype=np.float32)
     self.policy_inputs = {k: Tensor(v, device='NPY').realize() for k,v in self.numpy_inputs.items()}
     self.policy_output = np.zeros(policy_output_size, dtype=np.float32)
     self.parser = Parser()
+    if TICI:
+      with open(VISION_PKL_PATH, "rb") as f:
+        self.vision_run = pickle.load(f)
 
-    with open(VISION_PKL_PATH, "rb") as f:
-      self.vision_run = pickle.load(f)
+      with open(POLICY_PKL_PATH, "rb") as f:
+        self.policy_run = pickle.load(f)
+    else:
+      # initialise NPU on Rockchip
+      self.vision_run_rknn = RKNNLite(verbose=False)
+      self.vision_run_rknn.load_rknn(VISION_RKNN_PATH)
+      self.vision_run_rknn.init_runtime(core_mask=RKNNLite.NPU_CORE_ALL)
 
-    with open(POLICY_PKL_PATH, "rb") as f:
-      self.policy_run = pickle.load(f)
+      self.policy_run_rknn = RKNNLite(verbose=False)
+      self.policy_run_rknn.load_rknn(POLICY_RKNN_PATH)
+      self.policy_run_rknn.init_runtime(core_mask=RKNNLite.NPU_CORE_ALL)
 
   def slice_outputs(self, model_outputs: np.ndarray, output_slices: dict[str, slice]) -> dict[str, np.ndarray]:
     parsed_model_outputs = {k: model_outputs[np.newaxis, v] for k,v in output_slices.items()}
@@ -128,20 +143,27 @@ class ModelState:
           self.vision_inputs[key] = qcom_tensor_from_opencl_address(imgs_cl[key].mem_address, self.vision_input_shapes[key], dtype=dtypes.uint8)
     else:
       for key in imgs_cl:
-        frame_input = self.frames[key].buffer_from_cl(imgs_cl[key]).reshape(self.vision_input_shapes[key])
-        self.vision_inputs[key] = Tensor(frame_input, dtype=dtypes.uint8).realize()
+        self.vision_inputs[key] = self.frames[key].buffer_from_cl(imgs_cl[key]).reshape(self.vision_input_shapes[key]).astype(np.float16)
 
     if prepare_only:
       return None
 
-    self.vision_output = self.vision_run(**self.vision_inputs).numpy().flatten()
+    if TICI:
+      self.vision_output = self.vision_run(**self.vision_inputs).numpy().flatten()
+    else:
+      vision_output = self.vision_run_rknn.inference(inputs=list(self.vision_inputs.values()), data_format=None)
+      self.vision_output = vision_output[0].flatten()
     vision_outputs_dict = self.parser.parse_vision_outputs(self.slice_outputs(self.vision_output, self.vision_output_slices))
 
     self.full_features_buffer[0,:-1] = self.full_features_buffer[0,1:]
     self.full_features_buffer[0,-1] = vision_outputs_dict['hidden_state'][0, :]
     self.numpy_inputs['features_buffer'][:] = self.full_features_buffer[0, self.temporal_idxs]
 
-    self.policy_output = self.policy_run(**self.policy_inputs).numpy().flatten()
+    if TICI:
+      self.policy_output = self.policy_run(**self.policy_inputs).numpy().flatten()
+    else:
+      policy_output = self.policy_run_rknn.inference(inputs=list(self.numpy_inputs.values()), data_format=None)
+      self.policy_output = policy_output[0].flatten()
     policy_outputs_dict = self.parser.parse_policy_outputs(self.slice_outputs(self.policy_output, self.policy_output_slices))
 
     # TODO model only uses last value now
@@ -154,6 +176,11 @@ class ModelState:
       combined_outputs_dict['raw_pred'] = np.concatenate([self.vision_output.copy(), self.policy_output.copy()])
 
     return combined_outputs_dict
+
+  def release(self):
+    if not TICI:
+      self.vision_run_rknn.release()
+      self.policy_run_rknn.release()
 
 
 def main(demo=False):
@@ -214,7 +241,7 @@ def main(demo=False):
   meta_extra = FrameMeta()
 
 
-  if demo:
+  if True:
     CP = get_demo_car_params()
   else:
     CP = messaging.log_from_bytes(params.get("CarParams", block=True), car.CarParams)
@@ -225,106 +252,109 @@ def main(demo=False):
 
   DH = DesireHelper()
 
-  while True:
-    # Keep receiving frames until we are at least 1 frame ahead of previous extra frame
-    while meta_main.timestamp_sof < meta_extra.timestamp_sof + 25000000:
-      buf_main = vipc_client_main.recv()
-      meta_main = FrameMeta(vipc_client_main)
-      if buf_main is None:
-        break
-
-    if buf_main is None:
-      cloudlog.debug("vipc_client_main no frame")
-      continue
-
-    if use_extra_client:
-      # Keep receiving extra frames until frame id matches main camera
-      while True:
-        buf_extra = vipc_client_extra.recv()
-        meta_extra = FrameMeta(vipc_client_extra)
-        if buf_extra is None or meta_main.timestamp_sof < meta_extra.timestamp_sof + 25000000:
+  try:
+    while True:
+      # Keep receiving frames until we are at least 1 frame ahead of previous extra frame
+      while meta_main.timestamp_sof < meta_extra.timestamp_sof + 25000000:
+        buf_main = vipc_client_main.recv()
+        meta_main = FrameMeta(vipc_client_main)
+        if buf_main is None:
           break
 
-      if buf_extra is None:
-        cloudlog.debug("vipc_client_extra no frame")
+      if buf_main is None:
+        cloudlog.debug("vipc_client_main no frame")
         continue
 
-      if abs(meta_main.timestamp_sof - meta_extra.timestamp_sof) > 10000000:
-        cloudlog.error(f"frames out of sync! main: {meta_main.frame_id} ({meta_main.timestamp_sof / 1e9:.5f}),\
-                         extra: {meta_extra.frame_id} ({meta_extra.timestamp_sof / 1e9:.5f})")
+      if use_extra_client:
+        # Keep receiving extra frames until frame id matches main camera
+        while True:
+          buf_extra = vipc_client_extra.recv()
+          meta_extra = FrameMeta(vipc_client_extra)
+          if buf_extra is None or meta_main.timestamp_sof < meta_extra.timestamp_sof + 25000000:
+            break
 
-    else:
-      # Use single camera
-      buf_extra = buf_main
-      meta_extra = meta_main
+        if buf_extra is None:
+          cloudlog.debug("vipc_client_extra no frame")
+          continue
 
-    sm.update(0)
-    desire = DH.desire
-    is_rhd = sm["driverMonitoringState"].isRHD
-    frame_id = sm["roadCameraState"].frameId
-    v_ego = max(sm["carState"].vEgo, 0.)
-    lateral_control_params = np.array([v_ego, steer_delay], dtype=np.float32)
-    if sm.updated["liveCalibration"] and sm.seen['roadCameraState'] and sm.seen['deviceState']:
-      device_from_calib_euler = np.array(sm["liveCalibration"].rpyCalib, dtype=np.float32)
-      dc = DEVICE_CAMERAS[(str(sm['deviceState'].deviceType), str(sm['roadCameraState'].sensor))]
-      model_transform_main = get_warp_matrix(device_from_calib_euler, dc.ecam.intrinsics if main_wide_camera else dc.fcam.intrinsics, False).astype(np.float32)
-      model_transform_extra = get_warp_matrix(device_from_calib_euler, dc.ecam.intrinsics, True).astype(np.float32)
-      live_calib_seen = True
+        if abs(meta_main.timestamp_sof - meta_extra.timestamp_sof) > 10000000:
+          cloudlog.error(f"frames out of sync! main: {meta_main.frame_id} ({meta_main.timestamp_sof / 1e9:.5f}),\
+                           extra: {meta_extra.frame_id} ({meta_extra.timestamp_sof / 1e9:.5f})")
 
-    traffic_convention = np.zeros(2)
-    traffic_convention[int(is_rhd)] = 1
+      else:
+        # Use single camera
+        buf_extra = buf_main
+        meta_extra = meta_main
 
-    vec_desire = np.zeros(ModelConstants.DESIRE_LEN, dtype=np.float32)
-    if desire >= 0 and desire < ModelConstants.DESIRE_LEN:
-      vec_desire[desire] = 1
+      sm.update(0)
+      desire = DH.desire
+      is_rhd = sm["driverMonitoringState"].isRHD
+      frame_id = sm["roadCameraState"].frameId
+      v_ego = max(sm["carState"].vEgo, 0.)
+      lateral_control_params = np.array([v_ego, steer_delay], dtype=np.float16)
+      if sm.updated["liveCalibration"] and sm.seen['roadCameraState'] and sm.seen['deviceState']:
+        device_from_calib_euler = np.array(sm["liveCalibration"].rpyCalib, dtype=np.float32)
+        dc = DEVICE_CAMERAS[(str(sm['deviceState'].deviceType), str(sm['roadCameraState'].sensor))]
+        model_transform_main = get_warp_matrix(device_from_calib_euler, dc.ecam.intrinsics if main_wide_camera else dc.fcam.intrinsics, False).astype(np.float32)
+        model_transform_extra = get_warp_matrix(device_from_calib_euler, dc.ecam.intrinsics, True).astype(np.float32)
+        live_calib_seen = True
 
-    # tracked dropped frames
-    vipc_dropped_frames = max(0, meta_main.frame_id - last_vipc_frame_id - 1)
-    frames_dropped = frame_dropped_filter.update(min(vipc_dropped_frames, 10))
-    if run_count < 10: # let frame drops warm up
-      frame_dropped_filter.x = 0.
-      frames_dropped = 0.
-    run_count = run_count + 1
+      traffic_convention = np.zeros(2)
+      traffic_convention[int(is_rhd)] = 1
 
-    frame_drop_ratio = frames_dropped / (1 + frames_dropped)
-    prepare_only = vipc_dropped_frames > 0
-    if prepare_only:
-      cloudlog.error(f"skipping model eval. Dropped {vipc_dropped_frames} frames")
+      vec_desire = np.zeros(ModelConstants.DESIRE_LEN, dtype=np.float16)
+      if desire >= 0 and desire < ModelConstants.DESIRE_LEN:
+        vec_desire[desire] = 1
 
-    inputs:dict[str, np.ndarray] = {
-      'desire': vec_desire,
-      'traffic_convention': traffic_convention,
-      'lateral_control_params': lateral_control_params,
-      }
+      # tracked dropped frames
+      vipc_dropped_frames = max(0, meta_main.frame_id - last_vipc_frame_id - 1)
+      frames_dropped = frame_dropped_filter.update(min(vipc_dropped_frames, 10))
+      if run_count < 10: # let frame drops warm up
+        frame_dropped_filter.x = 0.
+        frames_dropped = 0.
+      run_count = run_count + 1
 
-    mt1 = time.perf_counter()
-    model_output = model.run(buf_main, buf_extra, model_transform_main, model_transform_extra, inputs, prepare_only)
-    mt2 = time.perf_counter()
-    model_execution_time = mt2 - mt1
+      frame_drop_ratio = frames_dropped / (1 + frames_dropped)
+      prepare_only = vipc_dropped_frames > 0
+      if prepare_only:
+        cloudlog.error(f"skipping model eval. Dropped {vipc_dropped_frames} frames")
 
-    if model_output is not None:
-      modelv2_send = messaging.new_message('modelV2')
-      drivingdata_send = messaging.new_message('drivingModelData')
-      posenet_send = messaging.new_message('cameraOdometry')
-      fill_model_msg(drivingdata_send, modelv2_send, model_output, v_ego, steer_delay,
-                     publish_state, meta_main.frame_id, meta_extra.frame_id, frame_id,
-                     frame_drop_ratio, meta_main.timestamp_eof, model_execution_time, live_calib_seen)
+      inputs:dict[str, np.ndarray] = {
+        'desire': vec_desire,
+        'traffic_convention': traffic_convention,
+        'lateral_control_params': lateral_control_params,
+        }
 
-      desire_state = modelv2_send.modelV2.meta.desireState
-      l_lane_change_prob = desire_state[log.Desire.laneChangeLeft]
-      r_lane_change_prob = desire_state[log.Desire.laneChangeRight]
-      lane_change_prob = l_lane_change_prob + r_lane_change_prob
-      DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob)
-      modelv2_send.modelV2.meta.laneChangeState = DH.lane_change_state
-      modelv2_send.modelV2.meta.laneChangeDirection = DH.lane_change_direction
-      drivingdata_send.drivingModelData.meta.laneChangeState = DH.lane_change_state
-      drivingdata_send.drivingModelData.meta.laneChangeDirection = DH.lane_change_direction
+      mt1 = time.perf_counter()
+      model_output = model.run(buf_main, buf_extra, model_transform_main, model_transform_extra, inputs, prepare_only)
+      mt2 = time.perf_counter()
+      model_execution_time = mt2 - mt1
 
-      fill_pose_msg(posenet_send, model_output, meta_main.frame_id, vipc_dropped_frames, meta_main.timestamp_eof, live_calib_seen)
-      pm.send('modelV2', modelv2_send)
-      pm.send('drivingModelData', drivingdata_send)
-      pm.send('cameraOdometry', posenet_send)
-    last_vipc_frame_id = meta_main.frame_id
+      if model_output is not None:
+        modelv2_send = messaging.new_message('modelV2')
+        drivingdata_send = messaging.new_message('drivingModelData')
+        posenet_send = messaging.new_message('cameraOdometry')
+        fill_model_msg(drivingdata_send, modelv2_send, model_output, v_ego, steer_delay,
+                       publish_state, meta_main.frame_id, meta_extra.frame_id, frame_id,
+                       frame_drop_ratio, meta_main.timestamp_eof, model_execution_time, live_calib_seen)
+
+        desire_state = modelv2_send.modelV2.meta.desireState
+        l_lane_change_prob = desire_state[log.Desire.laneChangeLeft]
+        r_lane_change_prob = desire_state[log.Desire.laneChangeRight]
+        lane_change_prob = l_lane_change_prob + r_lane_change_prob
+        DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob)
+        modelv2_send.modelV2.meta.laneChangeState = DH.lane_change_state
+        modelv2_send.modelV2.meta.laneChangeDirection = DH.lane_change_direction
+        drivingdata_send.drivingModelData.meta.laneChangeState = DH.lane_change_state
+        drivingdata_send.drivingModelData.meta.laneChangeDirection = DH.lane_change_direction
+
+        fill_pose_msg(posenet_send, model_output, meta_main.frame_id, vipc_dropped_frames, meta_main.timestamp_eof, live_calib_seen)
+        pm.send('modelV2', modelv2_send)
+        pm.send('drivingModelData', drivingdata_send)
+        pm.send('cameraOdometry', posenet_send)
+      last_vipc_frame_id = meta_main.frame_id
+  finally:
+    model.release()
 
 
 if __name__ == "__main__":
