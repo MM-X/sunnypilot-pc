@@ -1,0 +1,10 @@
+./dataset/input_imgs_1.npy ./dataset/big_input_imgs_1.npy
+./dataset/input_imgs_2.npy ./dataset/big_input_imgs_2.npy
+./dataset/input_imgs_3.npy ./dataset/big_input_imgs_3.npy
+./dataset/input_imgs_4.npy ./dataset/big_input_imgs_4.npy
+./dataset/input_imgs_5.npy ./dataset/big_input_imgs_5.npy
+./dataset/input_imgs_6.npy ./dataset/big_input_imgs_6.npy
+./dataset/input_imgs_7.npy ./dataset/big_input_imgs_7.npy
+./dataset/input_imgs_8.npy ./dataset/big_input_imgs_8.npy
+./dataset/input_imgs_9.npy ./dataset/big_input_imgs_9.npy
+./dataset/input_imgs_10.npy ./dataset/big_input_imgs_10.npy

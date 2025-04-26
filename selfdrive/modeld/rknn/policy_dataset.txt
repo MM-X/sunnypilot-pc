@@ -1,0 +1,10 @@
+./dataset/desire_1.npy ./dataset/traffic_convention_1.npy ./dataset/lateral_control_params_1.npy ./dataset/prev_desired_curv_1.npy ./dataset/features_buffer_1.npy
+./dataset/desire_2.npy ./dataset/traffic_convention_2.npy ./dataset/lateral_control_params_2.npy ./dataset/prev_desired_curv_2.npy ./dataset/features_buffer_2.npy
+./dataset/desire_3.npy ./dataset/traffic_convention_3.npy ./dataset/lateral_control_params_3.npy ./dataset/prev_desired_curv_3.npy ./dataset/features_buffer_3.npy
+./dataset/desire_4.npy ./dataset/traffic_convention_4.npy ./dataset/lateral_control_params_4.npy ./dataset/prev_desired_curv_4.npy ./dataset/features_buffer_4.npy
+./dataset/desire_5.npy ./dataset/traffic_convention_5.npy ./dataset/lateral_control_params_5.npy ./dataset/prev_desired_curv_5.npy ./dataset/features_buffer_5.npy
+./dataset/desire_6.npy ./dataset/traffic_convention_6.npy ./dataset/lateral_control_params_6.npy ./dataset/prev_desired_curv_6.npy ./dataset/features_buffer_6.npy
+./dataset/desire_7.npy ./dataset/traffic_convention_7.npy ./dataset/lateral_control_params_7.npy ./dataset/prev_desired_curv_7.npy ./dataset/features_buffer_7.npy
+./dataset/desire_8.npy ./dataset/traffic_convention_8.npy ./dataset/lateral_control_params_8.npy ./dataset/prev_desired_curv_8.npy ./dataset/features_buffer_8.npy
+./dataset/desire_9.npy ./dataset/traffic_convention_9.npy ./dataset/lateral_control_params_9.npy ./dataset/prev_desired_curv_9.npy ./dataset/features_buffer_9.npy
+./dataset/desire_10.npy ./dataset/traffic_convention_10.npy ./dataset/lateral_control_params_10.npy ./dataset/prev_desired_curv_10.npy ./dataset/features_buffer_10.npy
