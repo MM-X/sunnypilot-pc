@@ -110,7 +110,7 @@ class Route:
     for f in files:
       fullpath = os.path.join(data_dir, f)
       explorer_match = re.match(RE.EXPLORER_FILE, f)
-      op_match = re.match(RE.OP_SEGMENT_DIR, f)
+      op_match = re.match(RE.OP_SEGMENT_DIR, "a2a0ccea32023010|"+f)
 
       if explorer_match:
         segment_name = explorer_match.group('segment_name')
@@ -164,7 +164,7 @@ class Route:
       except StopIteration:
         qcamera_path = None
 
-      segments.append(Segment(segment, log_path, qlog_path, camera_path, dcamera_path, ecamera_path, qcamera_path, self.metadata['url']))
+      segments.append(Segment(segment, log_path, qlog_path, camera_path, dcamera_path, ecamera_path, qcamera_path, ""))
 
     if len(segments) == 0:
       raise ValueError(f'Could not find segments for route {self.name.canonical_name} in data directory {data_dir}')

@@ -72,3 +72,28 @@ Use this layout to improve your car's tuning and generate plots for tuning PRs. 
 
 
 ![screenshot](https://i.imgur.com/cizHCH3.png)
+
+## 播放本地的segment
+
+![dir](./pic/dir.png)
+
+```bash
+cd sunnypilot-pc
+source .venv/bin/active
+cd tools/plotjuggler/
+
+./juggle.py "a2a0ccea32023010/目录名前半段" "路径" 片段/目录名后缀
+
+# 打开目录下除后缀，名称一样的所有文件夹的数据(文件夹后缀从0开始)
+./juggle.py "a2a0ccea32023010/00000042--7e8554b795" "/Users/mx/Downloads/sp_data"
+
+# 打开特定某一段的数据（后缀）（文件夹不必从0开始）
+./juggle.py "a2a0ccea32023010/00000042--7e8554b795" "/Users/mx/Downloads/sp_data" 10
+
+# 使用预置的layout，例如查看cpu使用情况
+./juggle.py "a2a0ccea32023010/00000042--7e8554b795" "/Users/mx/Downloads/sp_data" 10 --layout=layouts/system_lag_debug.xml
+```
+
+### 查看模型输出的数据质量（以车速为例）
+正常模型输出车速和地盘can车速基本重合，下图噪声过大，可以通过指令`./juggler.py --demo`产看正常数据的样子作为对比
+![juggler](./pic/juggler.png)

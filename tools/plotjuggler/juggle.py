@@ -82,7 +82,9 @@ def process(can, lr):
 
 
 def juggle_route(route_or_segment_name, can, layout, dbc, should_migrate):
-  lr = LogReader(route_or_segment_name, default_mode=ReadMode.AUTO_INTERACTIVE)
+  from openpilot.tools.lib.route import Route
+  r = Route(route_or_segment_name, data_dir=args.data_dir)
+  lr = LogReader(r.log_paths()[int(args.segments)] if args.segments is not None else r.log_paths(), default_mode=ReadMode.AUTO_INTERACTIVE)
 
   all_data = lr.run_across_segments(24, partial(process, can))
   if should_migrate:
@@ -116,6 +118,8 @@ if __name__ == "__main__":
   parser.add_argument("--install", action="store_true", help="Install or update PlotJuggler + plugins")
   parser.add_argument("--dbc", help="Set the DBC name to load for parsing CAN data. If not set, the DBC will be automatically inferred from the logs.")
   parser.add_argument("route_or_segment_name", nargs='?', help="The route or segment name to plot (cabana share URL accepted)")
+  parser.add_argument("data_dir", nargs='?',  help="local directory with routes")
+  parser.add_argument("segments", help="第几段数据", default=None, nargs="?")
 
   if len(sys.argv) == 1:
     parser.print_help()
