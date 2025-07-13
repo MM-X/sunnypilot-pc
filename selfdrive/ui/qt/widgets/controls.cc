@@ -12,13 +12,13 @@ AbstractControl::AbstractControl(const QString &title, const QString &desc, cons
 
   hlayout = new QHBoxLayout;
   hlayout->setMargin(0);
-  hlayout->setSpacing(20);
+  hlayout->setSpacing(7);
 
   // left icon
   icon_label = new QLabel(this);
   hlayout->addWidget(icon_label);
   if (!icon.isEmpty()) {
-    icon_pixmap = QPixmap(icon).scaledToWidth(80, Qt::SmoothTransformation);
+    icon_pixmap = QPixmap(icon).scaledToWidth(30, Qt::SmoothTransformation);
     icon_label->setPixmap(icon_pixmap);
     icon_label->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   }
@@ -26,8 +26,8 @@ AbstractControl::AbstractControl(const QString &title, const QString &desc, cons
 
   // title
   title_label = new QPushButton(title);
-  title_label->setFixedHeight(120);
-  title_label->setStyleSheet("font-size: 50px; font-weight: 400; text-align: left; border: none;");
+  title_label->setFixedHeight(44);
+  title_label->setStyleSheet("font-size: 18px; font-weight: 148; text-align: left; border: none;");
   hlayout->addWidget(title_label, 1);
 
   // value next to control button
@@ -40,8 +40,8 @@ AbstractControl::AbstractControl(const QString &title, const QString &desc, cons
 
   // description
   description = new QLabel(desc);
-  description->setContentsMargins(40, 20, 40, 20);
-  description->setStyleSheet("font-size: 40px; color: grey");
+  description->setContentsMargins(15, 7, 15, 7);
+  description->setStyleSheet("font-size: 15px; color: grey");
   description->setWordWrap(true);
   description->setVisible(false);
   main_layout->addWidget(description);
@@ -73,9 +73,9 @@ ButtonControl::ButtonControl(const QString &title, const QString &text, const QS
   btn.setStyleSheet(R"(
     QPushButton {
       padding: 0;
-      border-radius: 50px;
-      font-size: 35px;
-      font-weight: 500;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 185;
       color: #E4E4E4;
       background-color: #393939;
     }
@@ -86,7 +86,7 @@ ButtonControl::ButtonControl(const QString &title, const QString &text, const QS
       color: #33E4E4E4;
     }
   )");
-  btn.setFixedSize(250, 100);
+  btn.setFixedSize(92, 37);
   QObject::connect(&btn, &QPushButton::clicked, this, &ButtonControl::clicked);
   hlayout->addWidget(&btn);
 }
@@ -130,7 +130,7 @@ ParamControl::ParamControl(const QString &param, const QString &title, const QSt
 void ParamControl::toggleClicked(bool state) {
   auto do_confirm = [this]() {
     QString content("<body><h2 style=\"text-align: center;\">" + title_label->text() + "</h2><br>"
-                    "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + getDescription() + "</p></body>");
+                    "<p style=\"text-align: center; margin: 0 47px; font-size: 18px;\">" + getDescription() + "</p></body>");
     return ConfirmationDialog(content, tr("Enable"), tr("Cancel"), true, this).exec();
   };
 

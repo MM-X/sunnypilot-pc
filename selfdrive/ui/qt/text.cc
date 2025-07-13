@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
   setMainWindow(&window);
 
   QGridLayout *main_layout = new QGridLayout(&window);
-  main_layout->setMargin(50);
+  main_layout->setMargin(18);
 
   QLabel *label = new QLabel(argv[1]);
   label->setWordWrap(true);
@@ -48,15 +48,15 @@ int main(int argc, char *argv[]) {
       outline: none;
       color: white;
       background-color: black;
-      font-size: 60px;
+      font-size: 24px;
     }
     QPushButton {
-      padding: 50px;
-      padding-right: 100px;
-      padding-left: 100px;
-      border: 2px solid white;
-      border-radius: 20px;
-      margin-right: 40px;
+      padding: 18px;
+      padding-right: 38px;
+      padding-left: 38px;
+      border: 1px solid white;
+      border-radius: 8px;
+      margin-right: 16px;
     }
   )");
 

@@ -12,14 +12,14 @@ TripsPanel::TripsPanel(QWidget* parent) : QFrame(parent) {
   main_layout->setMargin(0);
 
   // main content
-  main_layout->addSpacing(25);
+  main_layout->addSpacing(9);
   center_layout = new QStackedLayout();
 
   driveStatsWidget = new DriveStats;
   driveStatsWidget->setStyleSheet(R"(
-    QLabel[type="title"] { font-size: 51px; font-weight: 500; }
-    QLabel[type="number"] { font-size: 78px; font-weight: 500; }
-    QLabel[type="unit"] { font-size: 51px; font-weight: 300; color: #A0A0A0; }
+    QLabel[type="title"] { font-size: 19px; font-weight: 185; }
+    QLabel[type="number"] { font-size: 29px; font-weight: 185; }
+    QLabel[type="unit"] { font-size: 19px; font-weight: 111; color: #A0A0A0; }
   )");
   center_layout->addWidget(driveStatsWidget);
 
@@ -30,7 +30,7 @@ TripsPanel::TripsPanel(QWidget* parent) : QFrame(parent) {
       color: white;
     }
     TripsPanel > QLabel {
-      font-size: 55px;
+      font-size: 20px;
     }
   )");
 }

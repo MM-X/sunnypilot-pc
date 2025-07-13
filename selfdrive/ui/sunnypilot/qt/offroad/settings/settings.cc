@@ -35,23 +35,23 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
 
   // setup layout for close button
   QVBoxLayout *close_btn_layout = new QVBoxLayout;
-  close_btn_layout->setContentsMargins(0, 0, 0, 20);
+  close_btn_layout->setContentsMargins(0, 0, 0, 8);
 
   // close button
   QPushButton *close_btn = new QPushButton(tr("×"));
   close_btn->setStyleSheet(R"(
     QPushButton {
-      font-size: 140px;
-      padding-bottom: 20px;
-      border-radius: 76px;
+      font-size: 52px;
+      padding-bottom: 7px;
+      border-radius: 28px;
       background-color: #292929;
-      font-weight: 400;
+      font-weight: 148;
     }
     QPushButton:pressed {
       background-color: #3B3B3B;
     }
   )");
-  close_btn->setFixedSize(152, 152);
+  close_btn->setFixedSize(56, 56);
   close_btn_layout->addWidget(close_btn, 0, Qt::AlignLeft);
   QObject::connect(close_btn, &QPushButton::clicked, this, &SettingsWindowSP::closeSettings);
 
@@ -59,7 +59,7 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
   QWidget *buttons_widget = new QWidget;
   QVBoxLayout *buttons_layout = new QVBoxLayout(buttons_widget);
   buttons_layout->setMargin(0);
-  buttons_layout->addSpacing(10);
+  buttons_layout->addSpacing(4);
 
   // setup panels
   DevicePanelSP *device = new DevicePanelSP(this);
@@ -91,19 +91,19 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
     btn->setCheckable(true);
     btn->setChecked(nav_btns->buttons().size() == 0);
     btn->setIcon(QIcon(QPixmap(icon)));
-    btn->setIconSize(QSize(70, 70));
+    btn->setIconSize(QSize(26, 26));
     btn->setStyleSheet(R"(
       QPushButton {
-        border-radius: 20px;
-        width: 400px;
-        height: 98px;
+        border-radius: 7px;
+        width: 148px;
+        height: 36px;
         color: #bdbdbd;
         border: none;
         background: none;
-        font-size: 50px;
-        font-weight: 500;
+        font-size: 19px;
+        font-weight: 185;
         text-align: left;
-        padding-left: 22px;
+        padding-left: 8px;
       }
       QPushButton:checked {
         background-color: #696868;
@@ -117,8 +117,8 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
     nav_btns->addButton(btn);
     buttons_layout->addWidget(btn, 0, Qt::AlignLeft | Qt::AlignBottom);
 
-    const int lr_margin = (name != ("   " + tr("Network"))) ? 50 : 0;  // Network panel handles its own margins
-    panel->setContentsMargins(lr_margin, 25, lr_margin, 25);
+    const int lr_margin = (name != ("   " + tr("Network"))) ? 18 : 0;  // Network panel handles its own margins
+    panel->setContentsMargins(lr_margin, 9, lr_margin, 9);
 
     ScrollViewSP *panel_frame = new ScrollViewSP(panel, this);
     panel_widget->addWidget(panel_frame);
@@ -128,7 +128,7 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
       panel_widget->setCurrentWidget(w);
     });
   }
-  sidebar_layout->setContentsMargins(50, 50, 25, 50);
+  sidebar_layout->setContentsMargins(18, 18, 9, 18);
 
   // main settings layout, sidebar + main panel
   QHBoxLayout *main_layout = new QHBoxLayout(this);
@@ -140,21 +140,21 @@ SettingsWindowSP::SettingsWindowSP(QWidget *parent) : SettingsWindow(parent) {
   ScrollViewSP *buttons_scrollview = new ScrollViewSP(buttons_widget, this);
   sidebar_layout->addWidget(buttons_scrollview);
 
-  sidebar_widget->setFixedWidth(500);
+  sidebar_widget->setFixedWidth(185);
   main_layout->addWidget(sidebar_widget);
   main_layout->addWidget(panel_widget);
 
   setStyleSheet(R"(
     * {
       color: white;
-      font-size: 50px;
+      font-size: 18px;
     }
     SettingsWindow {
       background-color: black;
     }
     QStackedWidget, ScrollViewSP {
       background-color: black;
-      border-radius: 30px;
+      border-radius: 11px;
     }
   )");
 }

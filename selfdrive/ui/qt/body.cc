@@ -12,7 +12,7 @@
 RecordButton::RecordButton(QWidget *parent) : QPushButton(parent) {
   setCheckable(true);
   setChecked(false);
-  setFixedSize(148, 148);
+  setFixedSize(55, 55);
 
   QObject::connect(this, &QPushButton::toggled, [=]() {
     setEnabled(false);
@@ -38,15 +38,15 @@ void RecordButton::paintEvent(QPaintEvent *event) {
 
   p.setPen(Qt::NoPen);
   p.setBrush(bg);
-  p.drawEllipse(center, 74, 74);
+  p.drawEllipse(center, 27, 27);
 
-  p.setPen(QPen(accent, 6));
+  p.setPen(QPen(accent, 2));
   p.setBrush(Qt::NoBrush);
-  p.drawEllipse(center, 42, 42);
+  p.drawEllipse(center, 16, 16);
 
   p.setPen(Qt::NoPen);
   p.setBrush(accent);
-  p.drawEllipse(center, 22, 22);
+  p.drawEllipse(center, 8, 8);
 }
 
 
@@ -56,7 +56,7 @@ BodyWindow::BodyWindow(QWidget *parent) : fuel_filter(1.0, 5., 1. / UI_FREQ), QW
 
   QWidget *w = new QWidget;
   QVBoxLayout *vlayout = new QVBoxLayout(w);
-  vlayout->setMargin(45);
+  vlayout->setMargin(17);
   layout->addWidget(w);
 
   // face
@@ -88,23 +88,23 @@ void BodyWindow::paintEvent(QPaintEvent *event) {
   p.fillRect(rect(), QColor(0, 0, 0));
 
   // battery outline + detail
-  p.translate(width() - 136, 16);
+  p.translate(width() - 50, 6);
   const QColor gray = QColor("#737373");
   p.setBrush(Qt::NoBrush);
-  p.setPen(QPen(gray, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-  p.drawRoundedRect(2, 2, 78, 36, 8, 8);
+  p.setPen(QPen(gray, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+  p.drawRoundedRect(1, 1, 29, 13, 3, 3);
 
   p.setPen(Qt::NoPen);
   p.setBrush(gray);
-  p.drawRoundedRect(84, 12, 6, 16, 4, 4);
-  p.drawRect(84, 12, 3, 16);
+  p.drawRoundedRect(31, 4, 2, 6, 2, 2);
+  p.drawRect(31, 4, 1, 6);
 
   // battery level
   double fuel = std::clamp(fuel_filter.x(), 0.2f, 1.0f);
-  const int m = 5; // manual margin since we can't do an inner border
+  const int m = 2; // manual margin since we can't do an inner border
   p.setPen(Qt::NoPen);
   p.setBrush(fuel > 0.25 ? QColor("#32D74B") : QColor("#FF453A"));
-  p.drawRoundedRect(2 + m, 2 + m, (78 - 2*m)*fuel, 36 - 2*m, 4, 4);
+  p.drawRoundedRect(1 + m, 1 + m, (29- 2*m)*fuel, 13 - 2*m, 2, 2);
 
   // charging status
   if (charging) {

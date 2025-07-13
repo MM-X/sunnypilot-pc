@@ -16,7 +16,7 @@ LateralPanel::LateralPanel(SettingsWindowSP *parent) : QFrame(parent) {
 
   sunnypilotScreen = new QWidget(this);
   QVBoxLayout* vlayout = new QVBoxLayout(sunnypilotScreen);
-  vlayout->setContentsMargins(50, 20, 50, 20);
+  vlayout->setContentsMargins(18, 7, 18, 7);
 
   // MADS
   madsToggle = new ParamControl(
@@ -92,11 +92,11 @@ LateralPanel::LateralPanel(SettingsWindowSP *parent) : QFrame(parent) {
 
   setStyleSheet(R"(
     #back_btn {
-      font-size: 50px;
+      font-size: 18px;
       margin: 0px;
-      padding: 15px;
+      padding: 6px;
       border-width: 0;
-      border-radius: 30px;
+      border-radius: 11px;
       color: #dddddd;
       background-color: #393939;
     }

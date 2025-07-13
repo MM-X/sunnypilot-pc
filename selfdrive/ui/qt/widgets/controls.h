@@ -119,7 +119,7 @@ class ToggleControl : public AbstractControl {
 
 public:
   ToggleControl(const QString &title, const QString &desc = "", const QString &icon = "", const bool state = false, QWidget *parent = nullptr) : AbstractControl(title, desc, icon, parent) {
-    toggle.setFixedSize(150, 100);
+    toggle.setFixedSize(56, 37);
     if (state) {
       toggle.togglePosition();
     }
@@ -151,7 +151,7 @@ public:
   }
 
   void setActiveIcon(const QString &icon) {
-    active_icon_pixmap = QPixmap(icon).scaledToWidth(80, Qt::SmoothTransformation);
+    active_icon_pixmap = QPixmap(icon).scaledToWidth(30, Qt::SmoothTransformation);
   }
 
   void refresh() {
@@ -187,14 +187,14 @@ class ButtonParamControl : public AbstractControl {
   Q_OBJECT
 public:
   ButtonParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon,
-                     const std::vector<QString> &button_texts, const int minimum_button_width = 225) : AbstractControl(title, desc, icon) {
+                     const std::vector<QString> &button_texts, const int minimum_button_width = 83) : AbstractControl(title, desc, icon) {
     const QString style = R"(
       QPushButton {
-        border-radius: 50px;
-        font-size: 40px;
-        font-weight: 500;
-        height:100px;
-        padding: 0 25 0 25;
+        border-radius: 18px;
+        font-size: 14px;
+        font-weight: 185;
+        height:37px;
+        padding: 0 9 0 9;
         color: #E4E4E4;
         background-color: #393939;
       }
@@ -261,7 +261,7 @@ class ListWidget : public QWidget {
     outer_layout.setSpacing(0);
     outer_layout.addLayout(&inner_layout);
     inner_layout.setMargin(0);
-    inner_layout.setSpacing(25); // default spacing is 25
+    inner_layout.setSpacing(9); // default spacing is 25
     outer_layout.addStretch(1);
   }
   inline void addItem(QWidget *w) { inner_layout.addWidget(w); }
@@ -277,7 +277,7 @@ private:
       if (widget == nullptr || widget->isVisible()) {
         QRect r = inner_layout.itemAt(i)->geometry();
         int bottom = r.bottom() + inner_layout.spacing() / 2;
-        p.drawLine(r.left() + 40, bottom, r.right() - 40, bottom);
+        p.drawLine(r.left() + 15, bottom, r.right() - 15, bottom);
       }
     }
   }

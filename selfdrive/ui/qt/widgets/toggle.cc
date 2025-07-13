@@ -3,8 +3,8 @@
 #include <QPainter>
 
 Toggle::Toggle(QWidget *parent) : QAbstractButton(parent),
-_height(80),
-_height_rect(60),
+_height(30),
+_height_rect(22),
 on(false),
 _anim(new QPropertyAnimation(this, "offset_circle", this))
 {

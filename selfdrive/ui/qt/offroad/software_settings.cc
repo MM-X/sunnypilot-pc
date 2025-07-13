@@ -22,7 +22,7 @@ void SoftwarePanel::checkForUpdates() {
 
 SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   onroadLbl = new QLabel(tr("Updates are only downloaded while the car is off."));
-  onroadLbl->setStyleSheet("font-size: 50px; font-weight: 400; text-align: left; padding-top: 30px; padding-bottom: 30px;");
+  onroadLbl->setStyleSheet("font-size: 18px; font-weight: 148; text-align: left; padding-top: 12px; padding-bottom: 12px;");
   addItem(onroadLbl);
 
   // current version

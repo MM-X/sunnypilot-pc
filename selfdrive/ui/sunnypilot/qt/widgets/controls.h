@@ -18,7 +18,7 @@
 #include "selfdrive/ui/sunnypilot/qt/widgets/toggle.h"
 
 QFrame *horizontal_line(QWidget *parent = nullptr);
-QFrame *vertical_space(int height = 10, QWidget *parent = nullptr);
+QFrame *vertical_space(int height = 4, QWidget *parent = nullptr);
 
 inline void ReplaceWidget(QWidget *old_widget, QWidget *new_widget) {
   if (old_widget && old_widget->parentWidget() && old_widget->parentWidget()->layout()) {
@@ -148,7 +148,7 @@ public:
     icon_label = new QLabel(this);
     hlayout->addWidget(icon_label);
 
-    toggle.setFixedSize(150, 100);
+    toggle.setFixedSize(55, 37);
     if (state) {
       toggle.togglePosition();
     }
@@ -220,14 +220,14 @@ class ButtonParamControlSP : public AbstractControlSP_SELECTOR {
 
 public:
   ButtonParamControlSP(const QString &param, const QString &title, const QString &desc, const QString &icon,
-                       const std::vector<QString> &button_texts, const int minimum_button_width = 300) : AbstractControlSP_SELECTOR(title, desc, icon), button_texts(button_texts) {
+                       const std::vector<QString> &button_texts, const int minimum_button_width = 111) : AbstractControlSP_SELECTOR(title, desc, icon), button_texts(button_texts) {
     const QString style = R"(
       QPushButton {
-        border-radius: 20px;
-        font-size: 50px;
-        font-weight: 450;
-        height:150px;
-        padding: 0 25 0 25;
+        border-radius: 7px;
+        font-size: 18px;
+        font-weight: 166;
+        height:55px;
+        padding: 0 9 0 9;
         color: #FFFFFF;
       }
       QPushButton:pressed {
@@ -255,7 +255,7 @@ public:
       button->setChecked(i == value);
       button->setStyleSheet(style);
       button->setMinimumWidth(minimum_button_width);
-      if (i == 0) hlayout->addSpacing(2);
+      if (i == 0) hlayout->addSpacing(1);
       hlayout->addWidget(button);
       button_group->addButton(button, i);
     }
@@ -320,7 +320,7 @@ protected:
 
     // Calculate the total width and height for the background rectangle
     int w = 0;
-    int h = 150;
+    int h = 55;
 
     for (int i = 0; i < hlayout->count(); ++i) {
       QPushButton *button = qobject_cast<QPushButton *>(hlayout->itemAt(i)->widget());
@@ -331,12 +331,12 @@ protected:
 
     // Draw the rectangle
 #ifdef __APPLE__
-    QRect rect(0 + 2, h - 16, w, h);
+    QRect rect(0 + 1, h - 6, w, h);
 #else
-    QRect rect(0 + 2, h - 24, w, h);
+    QRect rect(0 + 1, h - 9, w, h);
 #endif
     p.setPen(QPen(QColor(button_group_enabled ? "#696868" : "#121212"), 3));
-    p.drawRoundedRect(rect, 20, 20);
+    p.drawRoundedRect(rect, 7, 7);
   }
 
 signals:
@@ -360,7 +360,7 @@ public:
     outer_layout.setSpacing(0);
     outer_layout.addLayout(&inner_layout);
     inner_layout.setMargin(0);
-    inner_layout.setSpacing(25); // default spacing is 25
+    inner_layout.setSpacing(9); // default spacing is 25
     outer_layout.addStretch();
   }
   inline void addItem(QWidget *w) { inner_layout.addWidget(w); }
@@ -427,12 +427,12 @@ public:
                   const MinMaxValue &range, const int per_value_change = 1) : _title(title), AbstractControlSP_SELECTOR(title, desc, icon) {
     const QString style = R"(
       QPushButton {
-        border-radius: 20px;
-        font-size: 60px;
-        font-weight: 500;
-        width: 150px;
-        height: 150px;
-        padding: -3 25 3 25;
+        border-radius: 7px;
+        font-size: 22px;
+        font-weight: 185;
+        width: 55px;
+        height: 55px;
+        padding: -1 9 1 9;
         color: #FFFFFF;
         font-weight: bold;
       }
@@ -445,7 +445,7 @@ public:
     )";
 
     label.setStyleSheet(label_enabled_style);
-    label.setFixedWidth(300);
+    label.setFixedWidth(111);
     label.setAlignment(Qt::AlignCenter);
 
     const std::vector<QString> button_texts{"－", "＋"};
@@ -511,7 +511,7 @@ protected:
 
     // Calculate the total width and height for the background rectangle
     int w = 0;
-    int h = 150;
+    int h = 55;
 
     for (int i = 0; i < hlayout->count(); ++i) {
       QWidget *widget = qobject_cast<QWidget *>(hlayout->itemAt(i)->widget());
@@ -522,9 +522,9 @@ protected:
 
     // Draw the rectangle
 #ifdef __APPLE__
-    QRect rect(0, !_title.isEmpty() ? (h - 16) : 20, w, h);
+    QRect rect(0, !_title.isEmpty() ? (h - 6) : 7, w, h);
 #else
-    QRect rect(0, !_title.isEmpty() ? (h - 24) : 20, w, h);
+    QRect rect(0, !_title.isEmpty() ? (h - 9) : 7, w, h);
 #endif
     p.setBrush(QColor(button_enabled ? "#b24a4a4a" : "#121212")); // Background color
     p.setPen(QPen(Qt::NoPen));
@@ -545,8 +545,8 @@ private:
   bool request_update = false;
   QString _title = "";
 
-  const QString label_enabled_style = "font-size: 50px; font-weight: 450; color: #FFFFFF;";
-  const QString label_disabled_style = "font-size: 50px; font-weight: 450; color: #5C5C5C;";
+  const QString label_enabled_style = "font-size: 18px; font-weight: 166; color: #FFFFFF;";
+  const QString label_disabled_style = "font-size: 18px; font-weight: 166; color: #5C5C5C;";
 
   bool button_enabled = true;
 };
@@ -555,14 +555,14 @@ class PushButtonSP : public QPushButton {
   Q_OBJECT
 
 public:
-  PushButtonSP(const QString &text, const int minimum_button_width = 800, QWidget *parent = nullptr, const QString &param = "") : QPushButton(text, parent) {
+  PushButtonSP(const QString &text, const int minimum_button_width = 296, QWidget *parent = nullptr, const QString &param = "") : QPushButton(text, parent) {
     buttonStyle = R"(
       QPushButton {
-        border-radius: 20px;
-        font-size: 50px;
-        font-weight: 450;
-        height: 150px;
-        padding: 0 25px 0 25px;
+        border-radius: 7px;
+        font-size: 18px;
+        font-weight: 166;
+        height: 55px;
+        padding: 0 9px 0 9px;
         color: #FFFFFF;
       }
     )";
@@ -628,6 +628,6 @@ class PanelBackButton : public QPushButton {
 public:
   PanelBackButton(const QString &label = "Back", QWidget *parent = nullptr) : QPushButton(label, parent) {
     setObjectName("back_btn");
-    setFixedSize(400, 100);
+    setFixedSize(148, 37);
   }
 };

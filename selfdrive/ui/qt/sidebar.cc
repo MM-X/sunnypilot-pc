@@ -5,23 +5,23 @@
 #include "selfdrive/ui/qt/util.h"
 
 void Sidebar::drawMetric(QPainter &p, const QPair<QString, QString> &label, QColor c, int y) {
-  const QRect rect = {30, y, 240, 126};
+  const QRect rect = {11, y, 89, 47};
 
   p.setPen(Qt::NoPen);
   p.setBrush(QBrush(c));
-  p.setClipRect(rect.x() + 4, rect.y(), 18, rect.height(), Qt::ClipOperation::ReplaceClip);
-  p.drawRoundedRect(QRect(rect.x() + 4, rect.y() + 4, 100, 118), 18, 18);
+  p.setClipRect(rect.x() + 2, rect.y(), 7, rect.height(), Qt::ClipOperation::ReplaceClip);
+  p.drawRoundedRect(QRect(rect.x() + 2, rect.y() + 2, 37, 44), 7, 7);
   p.setClipping(false);
 
   QPen pen = QPen(QColor(0xff, 0xff, 0xff, 0x55));
-  pen.setWidth(2);
+  pen.setWidth(1);
   p.setPen(pen);
   p.setBrush(Qt::NoBrush);
-  p.drawRoundedRect(rect, 20, 20);
+  p.drawRoundedRect(rect, 7, 7);
 
   p.setPen(QColor(0xff, 0xff, 0xff));
-  p.setFont(InterFont(35, QFont::DemiBold));
-  p.drawText(rect.adjusted(22, 0, 0, 0), Qt::AlignCenter, label.first + "\n" + label.second);
+  p.setFont(InterFont(13, QFont::DemiBold));
+  p.drawText(rect.adjusted(8, 0, 0, 0), Qt::AlignCenter, label.first + "\n" + label.second);
 }
 
 Sidebar::Sidebar(QWidget *parent) : QFrame(parent), onroad(false), flag_pressed(false), settings_pressed(false) {
@@ -33,7 +33,7 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent), onroad(false), flag_pressed(
 
   setAttribute(Qt::WA_OpaquePaintEvent);
   setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-  setFixedWidth(300);
+  setFixedWidth(111);
 
   QObject::connect(uiState(), &UIState::uiUpdate, this, &Sidebar::updateState);
 
@@ -127,23 +127,23 @@ void Sidebar::drawSidebar(QPainter &p) {
   p.setOpacity(1.0);
 
   // network
-  int x = 58;
+  int x = 21;
   const QColor gray(0x54, 0x54, 0x54);
   for (int i = 0; i < 5; ++i) {
     p.setBrush(i < net_strength ? Qt::white : gray);
-    p.drawEllipse(x, 196, 27, 27);
-    x += 37;
+    p.drawEllipse(x, 73, 10, 10);
+    x += 14;
   }
 
-  p.setFont(InterFont(35));
+  p.setFont(InterFont(13));
   p.setPen(QColor(0xff, 0xff, 0xff));
-  const QRect r = QRect(58, 247, width() - 100, 50);
+  const QRect r = QRect(21, 91, width() - 37, 18);
   p.drawText(r, Qt::AlignLeft | Qt::AlignVCenter, net_type);
 
 #ifndef SUNNYPILOT
   // metrics
-  drawMetric(p, temp_status.first, temp_status.second, 338);
-  drawMetric(p, panda_status.first, panda_status.second, 496);
-  drawMetric(p, connect_status.first, connect_status.second, 654);
+  drawMetric(p, temp_status.first, temp_status.second, 125);
+  drawMetric(p, panda_status.first, panda_status.second, 184);
+  drawMetric(p, connect_status.first, connect_status.second, 242);
 #endif
 }

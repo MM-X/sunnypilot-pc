@@ -11,8 +11,8 @@
 
 MadsSettings::MadsSettings(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
-  main_layout->setContentsMargins(50, 20, 50, 20);
-  main_layout->setSpacing(20);
+  main_layout->setContentsMargins(18, 7, 18, 7);
+  main_layout->setSpacing(7);
 
   // Back button
   PanelBackButton *back = new PanelBackButton();
@@ -50,7 +50,7 @@ MadsSettings::MadsSettings(QWidget *parent) : QWidget(parent) {
        "Disengage: ALC will be disengaged after the brake pedal is pressed.\n"
     "",
     lateral_on_brake_texts,
-    500);
+    185);
   list->addItem(madsSteeringMode);
 
   QObject::connect(uiState(), &UIState::offroadTransition, this, &MadsSettings::updateToggles);

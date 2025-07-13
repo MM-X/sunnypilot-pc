@@ -98,12 +98,12 @@ SunnylinkSponsorPopup::SunnylinkSponsorPopup(bool sponsor_pair, QWidget *parent)
 
   // text
   auto vlayout = new QVBoxLayout();
-  vlayout->setContentsMargins(85, 70, 50, 70);
-  vlayout->setSpacing(50);
+  vlayout->setContentsMargins(31, 26, 18, 26);
+  vlayout->setSpacing(18);
   hlayout->addLayout(vlayout, 1);
   {
     auto close = new QPushButton(QIcon(":/icons/close.svg"), "", this);
-    close->setIconSize(QSize(80, 80));
+    close->setIconSize(QSize(30, 30));
     close->setStyleSheet("border: none;");
     vlayout->addWidget(close, 0, Qt::AlignLeft);
     connect(close, &QPushButton::clicked, this, [=] {
@@ -116,20 +116,20 @@ SunnylinkSponsorPopup::SunnylinkSponsorPopup(bool sponsor_pair, QWidget *parent)
 
     const QString titleText = sponsor_pair ? tr("Pair your GitHub account") : tr("Early Access: Become a sunnypilot Sponsor");
     const auto title = new QLabel(titleText, this);
-    title->setStyleSheet("font-size: 75px; color: black;");
+    title->setStyleSheet("font-size: 27px; color: black;");
     title->setWordWrap(true);
     vlayout->addWidget(title);
 
     QStringList instructions = getInstructions(sponsor_pair);
-    QString instructionsHtml = "<ol type='1' style='margin-left: 15px;'>";
+    QString instructionsHtml = "<ol type='1' style='margin-left: 6px;'>";
     for (const auto & instruction : instructions) {
-      instructionsHtml += QString("<li style='margin-bottom: 50px;'>%1</li>").arg(instruction);
+      instructionsHtml += QString("<li style='margin-bottom: 18px;'>%1</li>").arg(instruction);
     }
     instructionsHtml += "</ol>";
     const auto instructionsLabel = new QLabel(instructionsHtml, this);
 
 
-    instructionsLabel->setStyleSheet("font-size: 47px; font-weight: bold; color: black;");
+    instructionsLabel->setStyleSheet("font-size: 17px; font-weight: bold; color: black;");
     instructionsLabel->setWordWrap(true);
     vlayout->addWidget(instructionsLabel);
 

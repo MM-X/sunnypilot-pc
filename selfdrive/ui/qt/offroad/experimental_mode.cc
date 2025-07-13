@@ -21,7 +21,7 @@ ExperimentalModeButton::ExperimentalModeButton(QWidget *parent) : QPushButton(pa
   // go to toggles and expand experimental mode description
   connect(this, &QPushButton::clicked, [=]() { emit openSettings(toggles_settings_index, "ExperimentalMode"); });
 
-  setFixedHeight(125);
+  setFixedHeight(46);
   QHBoxLayout *main_layout = new QHBoxLayout;
   main_layout->setContentsMargins(horizontal_padding, 0, horizontal_padding, 0);
 
@@ -40,8 +40,8 @@ ExperimentalModeButton::ExperimentalModeButton(QWidget *parent) : QPushButton(pa
     }
 
     QLabel {
-      font-size: 45px;
-      font-weight: 300;
+      font-size: 16px;
+      font-weight: 112;
       text-align: left;
       font-family: JetBrainsMono;
       color: #000000;
@@ -55,7 +55,7 @@ void ExperimentalModeButton::paintEvent(QPaintEvent *event) {
   p.setRenderHint(QPainter::Antialiasing);
 
   QPainterPath path;
-  path.addRoundedRect(rect(), 10, 10);
+  path.addRoundedRect(rect(), 4, 4);
 
   // gradient
   bool pressed = isDown();

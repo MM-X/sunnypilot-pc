@@ -14,11 +14,11 @@ QFrame *horizontal_line(QWidget *parent) {
   QFrame *line = new QFrame(parent);
   line->setFrameShape(QFrame::StyledPanel);
   line->setStyleSheet(R"(
-    border-width: 2px;
+    border-width: 1px;
     border-bottom-style: solid;
     border-color: gray;
   )");
-  line->setFixedHeight(10);
+  line->setFixedHeight(4);
   return line;
 }
 
@@ -39,12 +39,12 @@ AbstractControlSP::AbstractControlSP(const QString &title, const QString &desc, 
 
   hlayout = new QHBoxLayout;
   hlayout->setMargin(0);
-  hlayout->setSpacing(20);
+  hlayout->setSpacing(7);
 
   // title
   title_label = new QPushButton(title);
-  title_label->setFixedHeight(120);
-  title_label->setStyleSheet("font-size: 50px; font-weight: 450; text-align: left; border: none;");
+  title_label->setFixedHeight(44);
+  title_label->setStyleSheet("font-size: 18px; font-weight: 166; text-align: left; border: none;");
   hlayout->addWidget(title_label, 1);
 
   // value next to control button
@@ -57,8 +57,8 @@ AbstractControlSP::AbstractControlSP(const QString &title, const QString &desc, 
 
   // description
   description = new QLabel(desc);
-  description->setContentsMargins(40, 20, 40, 20);
-  description->setStyleSheet("font-size: 40px; color: grey");
+  description->setContentsMargins(15, 7, 15, 7);
+  description->setStyleSheet("font-size: 15px; color: grey");
   description->setWordWrap(true);
   description->setVisible(false);
   main_layout->addWidget(description);
@@ -117,8 +117,8 @@ AbstractControlSP_SELECTOR::AbstractControlSP_SELECTOR(const QString &title, con
   // title
   if (!title.isEmpty()) {
     title_label = new QPushButton(title);
-    title_label->setFixedHeight(120);
-    title_label->setStyleSheet("font-size: 50px; font-weight: 450; text-align: left; border: none; padding: 20 0 0 0");
+    title_label->setFixedHeight(44);
+    title_label->setStyleSheet("font-size: 18px; font-weight: 166; text-align: left; border: none; padding: 7 0 0 0");
     main_layout->addWidget(title_label, 1);
 
     connect(title_label, &QPushButton::clicked, [=]() {
@@ -141,19 +141,19 @@ AbstractControlSP_SELECTOR::AbstractControlSP_SELECTOR(const QString &title, con
       }
     });
   } else {
-    main_layout->addSpacing(20);
+    main_layout->addSpacing(7);
   }
 
   main_layout->addLayout(hlayout);
   if (!desc.isEmpty() && spacingItem == nullptr) {
-    spacingItem = new QSpacerItem(44, 44, QSizePolicy::Minimum, QSizePolicy::Fixed);
+    spacingItem = new QSpacerItem(16, 16, QSizePolicy::Minimum, QSizePolicy::Fixed);
     main_layout->insertItem(main_layout->count(), spacingItem);
   }
 
   // description
   description = new QLabel(desc);
-  description->setContentsMargins(0, 20, 40, 20);
-  description->setStyleSheet("font-size: 40px; color: grey");
+  description->setContentsMargins(0, 7, 15, 7);
+  description->setStyleSheet("font-size: 15px; color: grey");
   description->setWordWrap(true);
   description->setVisible(false);
   main_layout->addWidget(description);
@@ -167,7 +167,7 @@ void AbstractControlSP_SELECTOR::hideEvent(QHideEvent *e) {
   }
 
   if (spacingItem == nullptr) {
-    spacingItem = new QSpacerItem(44, 44, QSizePolicy::Minimum, QSizePolicy::Fixed);
+    spacingItem = new QSpacerItem(16, 16, QSizePolicy::Minimum, QSizePolicy::Fixed);
     main_layout->insertItem(main_layout->indexOf(description), spacingItem);
   }
 }
@@ -181,9 +181,9 @@ ButtonControlSP::ButtonControlSP(const QString &title, const QString &text, cons
   btn.setStyleSheet(R"(
     QPushButton {
       padding: 0;
-      border-radius: 50px;
-      font-size: 35px;
-      font-weight: 500;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 185;
       color: #E4E4E4;
       background-color: #393939;
     }
@@ -194,7 +194,7 @@ ButtonControlSP::ButtonControlSP(const QString &title, const QString &text, cons
       color: #33E4E4E4;
     }
   )");
-  btn.setFixedSize(250, 100);
+  btn.setFixedSize(92, 37);
   QObject::connect(&btn, &QPushButton::clicked, this, &ButtonControlSP::clicked);
   hlayout->addWidget(&btn);
 }
@@ -246,7 +246,7 @@ ParamControlSP::ParamControlSP(const QString &param, const QString &title, const
 void ParamControlSP::toggleClicked(bool state) {
   auto do_confirm = [this]() {
     QString content("<body><h2 style=\"text-align: center;\">" + title_label->text() + "</h2><br>"
-                    "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + getDescription() + "</p></body>");
+                    "<p style=\"text-align: center; margin: 0 47px; font-size: 18px;\">" + getDescription() + "</p></body>");
     return ConfirmationDialog(content, tr("Enable"), tr("Cancel"), true, this).exec();
   };
 

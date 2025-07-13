@@ -21,14 +21,14 @@ Updater::Updater(const QString &updater_path, const QString &manifest_path, QWid
     layout->setContentsMargins(100, 250, 100, 100);
 
     QLabel *title = new QLabel(tr("Update Required"));
-    title->setStyleSheet("font-size: 80px; font-weight: bold;");
+    title->setStyleSheet("font-size: 30px; font-weight: bold;");
     layout->addWidget(title);
 
     layout->addSpacing(75);
 
     QLabel *desc = new QLabel(tr("An operating system update is required. Connect your device to Wi-Fi for the fastest update experience. The download size is approximately 1GB."));
     desc->setWordWrap(true);
-    desc->setStyleSheet("font-size: 65px;");
+    desc->setStyleSheet("font-size: 24px;");
     layout->addWidget(desc);
 
     layout->addStretch();
@@ -85,7 +85,7 @@ Updater::Updater(const QString &updater_path, const QString &manifest_path, QWid
     layout->setSpacing(0);
 
     text = new QLabel(tr("Loading..."));
-    text->setStyleSheet("font-size: 90px; font-weight: 600;");
+    text->setStyleSheet("font-size: 33px; font-weight: 222;");
     layout->addWidget(text, 0, Qt::AlignTop);
 
     layout->addSpacing(100);
@@ -100,7 +100,7 @@ Updater::Updater(const QString &updater_path, const QString &manifest_path, QWid
 
     reboot = new QPushButton(tr("Reboot"));
     reboot->setObjectName("navBtn");
-    reboot->setStyleSheet("padding-left: 60px; padding-right: 60px;");
+    reboot->setStyleSheet("padding-left: 22px; padding-right: 22px;");
     QObject::connect(reboot, &QPushButton::clicked, [=]() {
       Hardware::reboot();
     });
@@ -125,10 +125,10 @@ Updater::Updater(const QString &updater_path, const QString &manifest_path, QWid
       background-color: black;
     }
     QPushButton#navBtn {
-      height: 160;
-      font-size: 55px;
-      font-weight: 400;
-      border-radius: 10px;
+      height: 60;
+      font-size: 20px;
+      font-weight: 148;
+      border-radius: 4px;
       background-color: #333333;
     }
     QPushButton#navBtn:pressed {

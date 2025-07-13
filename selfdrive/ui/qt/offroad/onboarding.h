@@ -27,28 +27,28 @@ private:
   int currentIndex = 0;
 
   // Bounding boxes for each training guide step
-  const QRect continueBtn = {1840, 0, 320, 1080};
+  const QRect continueBtn = {681, 0, 118, 400};
   QVector<QRect> boundingRect {
-    QRect(112, 804, 618, 164),
+    QRect(41, 298, 229, 61),
     continueBtn,
     continueBtn,
-    QRect(1641, 558, 210, 313),
-    QRect(1662, 528, 184, 108),
+    QRect(608, 207, 78, 116),
+    QRect(616, 195, 68, 40),
     continueBtn,
-    QRect(1814, 621, 211, 170),
-    QRect(1350, 0, 497, 755),
-    QRect(1540, 386, 468, 238),
-    QRect(112, 804, 1126, 164),
-    QRect(1598, 199, 316, 333),
+    QRect(672, 230, 78, 63),
+    QRect(500, 0, 184, 280),
+    QRect(570, 143, 173, 88),
+    QRect(41, 298, 417, 61),
+    QRect(592, 74, 117, 123),
     continueBtn,
-    QRect(1364, 90, 796, 990),
+    QRect(505, 33, 295, 367),
     continueBtn,
-    QRect(1593, 114, 318, 853),
-    QRect(1379, 511, 391, 243),
+    QRect(590, 42, 118, 316),
+    QRect(511, 189, 145, 90),
     continueBtn,
     continueBtn,
-    QRect(630, 804, 626, 164),
-    QRect(108, 804, 426, 164),
+    QRect(233, 298, 232, 61),
+    QRect(40, 298, 157, 61),
   };
 
   const QString img_path = "../assets/training/";

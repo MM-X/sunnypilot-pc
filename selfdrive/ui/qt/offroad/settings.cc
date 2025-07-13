@@ -177,7 +177,7 @@ void TogglesPanel::updateToggles() {
 }
 
 DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
-  setSpacing(50);
+  setSpacing(19);
   addItem(new LabelControl(tr("Dongle ID"), getDongleId().value_or(tr("N/A"))));
   addItem(new LabelControl(tr("Serial"), params.get("HardwareSerial").c_str()));
 
@@ -255,7 +255,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
 #ifndef SUNNYPILOT
   // power buttons
   QHBoxLayout *power_layout = new QHBoxLayout();
-  power_layout->setSpacing(30);
+  power_layout->setSpacing(11);
 
   QPushButton *reboot_btn = new QPushButton(tr("Reboot"));
   reboot_btn->setObjectName("reboot_btn");
@@ -272,9 +272,9 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   }
 
   setStyleSheet(R"(
-    #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }
+    #reboot_btn { height: 44px; border-radius: 6px; background-color: #393939; }
     #reboot_btn:pressed { background-color: #4a4a4a; }
-    #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }
+    #poweroff_btn { height: 44px; border-radius: 6px; background-color: #E22C2C; }
     #poweroff_btn:pressed { background-color: #FF2424; }
   )");
   addItem(power_layout);
@@ -341,7 +341,7 @@ void SettingsWindow::setCurrentPanel(int index, const QString &param) {
     if (param.endsWith("Panel")) {
       QString panelName = param;
       panelName.chop(5); // Remove "Panel" suffix
-      
+
       // Find the panel by name
       for (int i = 0; i < nav_btns->buttons().size(); i++) {
         bool panel_trimmed = false;
@@ -357,7 +357,7 @@ void SettingsWindow::setCurrentPanel(int index, const QString &param) {
       emit expandToggleDescription(param);
     }
   }
-  
+
   panel_widget->setCurrentIndex(index);
   nav_btns->buttons()[index]->setChecked(true);
 }
@@ -373,18 +373,18 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   QPushButton *close_btn = new QPushButton(tr("×"));
   close_btn->setStyleSheet(R"(
     QPushButton {
-      font-size: 140px;
-      padding-bottom: 20px;
-      border-radius: 100px;
+      font-size: 52px;
+      padding-bottom: 8px;
+      border-radius: 38px;
       background-color: #292929;
-      font-weight: 400;
+      font-weight: 148;
     }
     QPushButton:pressed {
       background-color: #3B3B3B;
     }
   )");
-  close_btn->setFixedSize(200, 200);
-  sidebar_layout->addSpacing(45);
+  close_btn->setFixedSize(74, 74);
+  sidebar_layout->addSpacing(17);
   sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
   QObject::connect(close_btn, &QPushButton::clicked, this, &SettingsWindow::closeSettings);
 
@@ -418,8 +418,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
         color: grey;
         border: none;
         background: none;
-        font-size: 65px;
-        font-weight: 500;
+        font-size: 24px;
+        font-weight: 186;
       }
       QPushButton:checked {
         color: white;
@@ -432,8 +432,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     nav_btns->addButton(btn);
     sidebar_layout->addWidget(btn, 0, Qt::AlignRight);
 
-    const int lr_margin = name != tr("Network") ? 50 : 0;  // Network panel handles its own margins
-    panel->setContentsMargins(lr_margin, 25, lr_margin, 25);
+    const int lr_margin = name != tr("Network") ? 18 : 0;  // Network panel handles its own margins
+    panel->setContentsMargins(lr_margin, 9, lr_margin, 9);
 
     ScrollView *panel_frame = new ScrollView(panel, this);
     panel_widget->addWidget(panel_frame);
@@ -443,26 +443,26 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       panel_widget->setCurrentWidget(w);
     });
   }
-  sidebar_layout->setContentsMargins(50, 50, 100, 50);
+  sidebar_layout->setContentsMargins(18, 18, 37, 18);
 
   // main settings layout, sidebar + main panel
   QHBoxLayout *main_layout = new QHBoxLayout(this);
 
-  sidebar_widget->setFixedWidth(500);
+  sidebar_widget->setFixedWidth(185);
   main_layout->addWidget(sidebar_widget);
   main_layout->addWidget(panel_widget);
 
   setStyleSheet(R"(
     * {
       color: white;
-      font-size: 50px;
+      font-size: 18px;
     }
     SettingsWindow {
       background-color: black;
     }
     QStackedWidget, ScrollView {
       background-color: #292929;
-      border-radius: 30px;
+      border-radius: 12px;
     }
   )");
 #endif

@@ -13,8 +13,14 @@
 
 OffroadHomeSP::OffroadHomeSP(QWidget *parent) : OffroadHome(parent) {
   QStackedWidget *left_widget = new QStackedWidget(this);
-  left_widget->addWidget(new DriveStats(this));
-  left_widget->setStyleSheet("border-radius: 10px;");
+  DriveStats *driveStatsWidget = new DriveStats(this);
+  driveStatsWidget->setStyleSheet(R"(
+    QLabel[type="title"] { font-size: 19px; font-weight: 185; }
+    QLabel[type="number"] { font-size: 29px; font-weight: 185; }
+    QLabel[type="unit"] { font-size: 19px; font-weight: 111; color: #A0A0A0; }
+  )");
+  left_widget->addWidget(driveStatsWidget);
+  left_widget->setStyleSheet("border-radius: 4px;");
 
   home_layout->insertWidget(0, left_widget);
 }

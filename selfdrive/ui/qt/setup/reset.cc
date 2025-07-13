@@ -48,23 +48,23 @@ void Reset::confirm() {
 
 Reset::Reset(ResetMode mode, QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
-  main_layout->setContentsMargins(45, 220, 45, 45);
+  main_layout->setContentsMargins(16, 85, 16, 16);
   main_layout->setSpacing(0);
 
   QLabel *title = new QLabel(tr("System Reset"));
-  title->setStyleSheet("font-size: 90px; font-weight: 600;");
+  title->setStyleSheet("font-size: 34px; font-weight: 222;");
   main_layout->addWidget(title, 0, Qt::AlignTop | Qt::AlignLeft);
 
-  main_layout->addSpacing(60);
+  main_layout->addSpacing(22);
 
   body = new QLabel(tr("System reset triggered. Press confirm to erase all content and settings. Press cancel to resume boot."));
   body->setWordWrap(true);
-  body->setStyleSheet("font-size: 80px; font-weight: light;");
+  body->setStyleSheet("font-size: 30px; font-weight: light;");
   main_layout->addWidget(body, 1, Qt::AlignTop | Qt::AlignLeft);
 
   QHBoxLayout *blayout = new QHBoxLayout();
   main_layout->addLayout(blayout);
-  blayout->setSpacing(50);
+  blayout->setSpacing(18);
 
   rejectBtn = new QPushButton(tr("Cancel"));
   blayout->addWidget(rejectBtn);
@@ -109,13 +109,13 @@ Reset::Reset(ResetMode mode, QWidget *parent) : QWidget(parent) {
       background-color: black;
     }
     QLabel {
-      margin-left: 140;
+      margin-left: 52;
     }
     QPushButton {
-      height: 160;
-      font-size: 55px;
-      font-weight: 400;
-      border-radius: 10px;
+      height: 60;
+      font-size: 20px;
+      font-weight: 148;
+      border-radius: 4px;
       background-color: #333333;
     }
     QPushButton:pressed {

@@ -26,11 +26,11 @@ private:
 
   const QString alwaysOffroadStyle = R"(
     PushButtonSP {
-      border-radius: 20px;
-      font-size: 50px;
-      font-weight: 450;
-      height: 150px;
-      padding: 0 25px 0 25px;
+      border-radius: 7px;
+      font-size: 18px;
+      font-weight: 166;
+      height: 55px;
+      padding: 0 9px 0 9px;
       color: #FFFFFF;
       background-color: #393939;
     }
@@ -41,11 +41,11 @@ private:
 
   const QString autoOffroadStyle = R"(
     PushButtonSP {
-      border-radius: 20px;
-      font-size: 50px;
-      font-weight: 450;
-      height: 150px;
-      padding: 0 25px 0 25px;
+      border-radius: 7px;
+      font-size: 18px;
+      font-weight: 166;
+      height: 55px;
+      padding: 0 9px 0 9px;
       color: #FFFFFF;
       background-color: #E22C2C;
     }
@@ -56,11 +56,11 @@ private:
 
   const QString rebootButtonStyle = R"(
     PushButtonSP {
-      border-radius: 20px;
-      font-size: 50px;
-      font-weight: 450;
-      height: 150px;
-      padding: 0 25px 0 25px;
+      border-radius: 7px;
+      font-size: 18px;
+      font-weight: 166;
+      height: 55px;
+      padding: 0 9px 0 9px;
       color: #FFFFFF;
       background-color: #393939;
     }
@@ -71,11 +71,11 @@ private:
 
   const QString powerOffButtonStyle = R"(
     PushButtonSP {
-      border-radius: 20px;
-      font-size: 50px;
-      font-weight: 450;
-      height: 150px;
-      padding: 0 25px 0 25px;
+      border-radius: 7px;
+      font-size: 18px;
+      font-weight: 166;
+      height: 55px;
+      padding: 0 9px 0 9px;
       color: #FFFFFF;
       background-color: #E22C2C;
     }

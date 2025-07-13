@@ -54,7 +54,7 @@ void TrackWidget::paintEvent(QPaintEvent *event) {
 Spinner::Spinner(QWidget *parent) : QWidget(parent) {
   QGridLayout *main_layout = new QGridLayout(this);
   main_layout->setSpacing(0);
-  main_layout->setMargin(200);
+  main_layout->setMargin(74);
 
   main_layout->addWidget(new TrackWidget(this), 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -65,10 +65,10 @@ Spinner::Spinner(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(text, 1, 0, Qt::AlignHCenter);
 
   progress_bar = new QProgressBar();
-  progress_bar->setRange(5, 100);
+  progress_bar->setRange(2, 37);
   progress_bar->setTextVisible(false);
   progress_bar->setVisible(false);
-  progress_bar->setFixedHeight(20);
+  progress_bar->setFixedHeight(5);
   main_layout->addWidget(progress_bar, 1, 0, Qt::AlignHCenter);
 
   setStyleSheet(R"(
@@ -77,17 +77,17 @@ Spinner::Spinner(QWidget *parent) : QWidget(parent) {
     }
     QLabel {
       color: white;
-      font-size: 80px;
+      font-size: 30px;
       background-color: transparent;
     }
     QProgressBar {
       background-color: #373737;
-      width: 1000px;
+      width: 37px;
       border solid white;
-      border-radius: 10px;
+      border-radius: 4px;
     }
     QProgressBar::chunk {
-      border-radius: 10px;
+      border-radius: 4px;
       background-color: white;
     }
   )");

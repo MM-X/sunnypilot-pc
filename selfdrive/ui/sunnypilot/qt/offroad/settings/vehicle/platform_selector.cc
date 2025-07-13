@@ -75,7 +75,7 @@ void PlatformSelector::setPlatform(const QString &platform) {
                       .arg(platform, offroad_msg);
 
   QString content("<body><h2 style=\"text-align: center;\">" + tr("Vehicle Selector") + "</h2><br>"
-                  "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + msg + "</p></body>");
+                  "<p style=\"text-align: center; margin: 0 47px; font-size: 18px;\">" + msg + "</p></body>");
 
   if (ConfirmationDialog(content, tr("Confirm"), tr("Cancel"), true, this).exec()) {
     QJsonObject json_bundle;

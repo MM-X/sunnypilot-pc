@@ -1,6 +1,6 @@
 #include "selfdrive/ui/qt/onroad/model.h"
 
-constexpr int CLIP_MARGIN = 500;
+constexpr int CLIP_MARGIN = 185;
 constexpr float MIN_DRAW_DISTANCE = 10.0;
 constexpr float MAX_DRAW_DISTANCE = 100.0;
 

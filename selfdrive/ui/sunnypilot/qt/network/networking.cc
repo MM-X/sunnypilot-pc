@@ -6,11 +6,11 @@
 NetworkingSP::NetworkingSP(QWidget *parent) : Networking(parent) {
   auto vlayout = wifiScreen->findChild<QVBoxLayout*>();
   auto hlayout = new QHBoxLayout();
-  
+
   // Create and setup scan button
   auto scanButton = new QPushButton(tr("Scan"));
   scanButton->setObjectName("scan_btn");
-  scanButton->setFixedSize(400, 100);
+  scanButton->setFixedSize(148, 37);
 
   connect(wifi, &WifiManager::refreshSignal, this, [=]() { scanButton->setText(tr("Scan")); scanButton->setEnabled(true); });
   connect(scanButton, &QPushButton::clicked, [=]() { scanButton->setText(tr("Scanning...")); scanButton->setEnabled(false); wifi->requestScan(); });
@@ -25,7 +25,7 @@ NetworkingSP::NetworkingSP(QWidget *parent) : Networking(parent) {
   }
 
   // Insert our new layout at the top of vlayout
-  vlayout->setMargin(40);
+  vlayout->setMargin(15);
   vlayout->insertLayout(0, hlayout);
 
   // Add our scan button to the existing style selectors

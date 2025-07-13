@@ -15,8 +15,8 @@
 
 AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
-  main_layout->setMargin(50);
-  main_layout->setSpacing(30);
+  main_layout->setMargin(18);
+  main_layout->setSpacing(11);
 
   QWidget *widget = new QWidget;
   scrollable_layout = new QVBoxLayout(widget);
@@ -28,13 +28,13 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
   main_layout->addLayout(footer_layout);
 
   QPushButton *dismiss_btn = new QPushButton(tr("Close"));
-  dismiss_btn->setFixedSize(400, 125);
+  dismiss_btn->setFixedSize(148, 46);
   footer_layout->addWidget(dismiss_btn, 0, Qt::AlignBottom | Qt::AlignLeft);
   QObject::connect(dismiss_btn, &QPushButton::clicked, this, &AbstractAlert::dismiss);
 
   snooze_btn = new QPushButton(tr("Snooze Update"));
   snooze_btn->setVisible(false);
-  snooze_btn->setFixedSize(550, 125);
+  snooze_btn->setFixedSize(185, 46);
   footer_layout->addWidget(snooze_btn, 0, Qt::AlignBottom | Qt::AlignRight);
   QObject::connect(snooze_btn, &QPushButton::clicked, [=]() {
     params.putBool("SnoozeUpdate", true);
@@ -44,24 +44,24 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
 
   if (hasRebootBtn) {
     QPushButton *rebootBtn = new QPushButton(tr("Reboot and Update"));
-    rebootBtn->setFixedSize(600, 125);
+    rebootBtn->setFixedSize(222, 46);
     footer_layout->addWidget(rebootBtn, 0, Qt::AlignBottom | Qt::AlignRight);
     QObject::connect(rebootBtn, &QPushButton::clicked, [=]() { Hardware::reboot(); });
   }
 
   setStyleSheet(R"(
     * {
-      font-size: 48px;
+      font-size: 18px;
       color: white;
     }
     QFrame {
-      border-radius: 30px;
+      border-radius: 11px;
       background-color: #393939;
     }
     QPushButton {
       color: black;
-      font-weight: 500;
-      border-radius: 30px;
+      font-weight: 185;
+      border-radius: 11px;
       background-color: white;
     }
   )");
@@ -83,7 +83,7 @@ int OffroadAlert::refresh() {
     for (auto &[key, severity] : sorted) {
       QLabel *l = new QLabel(this);
       alerts[key] = l;
-      l->setMargin(60);
+      l->setMargin(22);
       l->setWordWrap(true);
       l->setStyleSheet(QString("background-color: %1").arg(severity ? "#E22C2C" : "#292929"));
       scrollable_layout->addWidget(l);
