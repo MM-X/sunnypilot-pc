@@ -39,7 +39,7 @@ J_EGO_COST = 5.0
 A_CHANGE_COST = 300.
 DANGER_ZONE_COST = 100.
 CRASH_DISTANCE = .25
-LEAD_DANGER_FACTOR = 0.9
+LEAD_DANGER_FACTOR = 0.95
 LIMIT_COST = 1e6
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
@@ -54,9 +54,10 @@ T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 2.5
-STOP_DISTANCE = 4.0
+STOP_DISTANCE = 6.0
+SAFE_DISTANCE = 5.0
 CRUISE_MIN_ACCEL = -0.8
-CRUISE_MAX_ACCEL = 1.6
+CRUISE_MAX_ACCEL = 2.0
 
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
@@ -82,13 +83,16 @@ def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * COMFORT_BRAKE)
 
-def get_safe_obstacle_distance(v_ego, t_follow):
+def get_ref_obstacle_distance(v_ego, t_follow):
   return (v_ego**2) / (2 * COMFORT_BRAKE) + t_follow * v_ego + STOP_DISTANCE
+
+def get_safe_obstacle_distance(v_ego, t_follow):
+  return (v_ego**2) / (2 * COMFORT_BRAKE) + t_follow * v_ego + SAFE_DISTANCE
 
 def desired_follow_distance(v_ego, v_lead, t_follow=None):
   if t_follow is None:
     t_follow = get_T_FOLLOW()
-  return get_safe_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead)
+  return get_ref_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead)
 
 
 def gen_long_model():
@@ -158,7 +162,7 @@ def gen_long_ocp():
   ocp.cost.yref = np.zeros((COST_DIM, ))
   ocp.cost.yref_e = np.zeros((COST_E_DIM, ))
 
-  desired_dist_comfort = get_safe_obstacle_distance(v_ego, lead_t_follow)
+  desired_dist_comfort = get_ref_obstacle_distance(v_ego, lead_t_follow)
 
   # The main cost in normal operation is how close you are to the "desired" distance
   # from an obstacle at every timestep. This obstacle can be a lead car
@@ -173,13 +177,15 @@ def gen_long_ocp():
   ocp.model.cost_y_expr = vertcat(*costs)
   ocp.model.cost_y_expr_e = vertcat(*costs[:-1])
 
+  safe_dist_comfort = get_safe_obstacle_distance(v_ego, lead_t_follow)
+
   # Constraints on speed, acceleration and desired distance to
   # the obstacle, which is treated as a slack constraint so it
   # behaves like an asymmetrical cost.
   constraints = vertcat(v_ego,
                         (a_ego - a_min),
                         (a_max - a_ego),
-                        ((x_obstacle - x_ego) - lead_danger_factor * (desired_dist_comfort)) / (v_ego + 10.))
+                        ((x_obstacle - x_ego) - lead_danger_factor * (safe_dist_comfort)) / 10.)
   ocp.model.con_h_expr = constraints
 
   x0 = np.zeros(X_DIM)
@@ -356,7 +362,7 @@ class LongitudinalMpc:
       v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
                                  v_lower,
                                  v_upper)
-      cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, t_follow)
+      cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_ref_obstacle_distance(v_cruise_clipped, t_follow)
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
       self.source = SOURCES[np.argmin(x_obstacles[0])]
 
@@ -402,9 +408,9 @@ class LongitudinalMpc:
     # Check if it got within lead comfort range
     # TODO This should be done cleaner
     if self.mode == 'blended':
-      if any((lead_0_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow))- self.x_sol[:,0] < 0.0):
+      if any((lead_0_obstacle - get_ref_obstacle_distance(self.x_sol[:,1], t_follow))- self.x_sol[:,0] < 0.0):
         self.source = 'lead0'
-      if any((lead_1_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow))- self.x_sol[:,0] < 0.0) and \
+      if any((lead_1_obstacle - get_ref_obstacle_distance(self.x_sol[:,1], t_follow))- self.x_sol[:,0] < 0.0) and \
          (lead_1_obstacle[0] - lead_0_obstacle[0]):
         self.source = 'lead1'
 
