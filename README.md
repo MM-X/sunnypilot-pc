@@ -1,11 +1,9 @@
 <div align="center" style="text-align: center;">
-<h1>openpilot-pc</h1>
-<b>在pc设备上运行sunnypilot </b>
+<h1>openpilot-rk</h1>
+<b>在rk3588设备上运行sunnypilot </b>
 </div>
 
-* CPU比较强大
-* 有NVIDIA的GPU
-* 有AMD的GPU
+* rk3588有GPU可以支持opencl的加速
 
 <h3>
 1. 环境安装
@@ -14,54 +12,47 @@
 参考 [webcam安装步骤](tools/webcam/README.md)
 
 <h3>
-2. GPU支持
-</h3>
-<h4>
-NVIDIA
-</h4>
-
-安装驱动
-参考[官方教程](https://developer.nvidia.com/cudnn-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_local)
-
-以下为官方教程精简:
-
-```bash
-# 确保安装的nvidia驱动是cuda12
-sudo apt update
-sudo apt install nvidia-cuda-toolkit
-wget https://developer.download.nvidia.com/compute/cudnn/9.7.1/local_installers/cudnn-local-repo-ubuntu2404-9.7.1_1.0-1_amd64.deb
-sudo dpkg -i cudnn-local-repo-ubuntu2404-9.7.1_1.0-1_amd64.deb
-sudo cp /var/cudnn-local-repo-ubuntu2404-9.7.1/cudnn-*-keyring.gpg /usr/share/keyrings/
-sudo apt-get update
-sudo apt-get -y install cudnn
-sudo apt-get -y install cudnn-cuda-12
-```
-![bug修复](docs/assets/ops_cuda.png)
-
-按上图修改相应的文件和内容,之后`tools/op.sh build`编译,之后运行就行
-
-默热配置的是`CPU`,按理说安装好相关`GPU`驱动会自动调用相应的`GPU`加速
-
-<h4>
-AMD
-</h4>
-
-参考官方教程
-
 
 <h3>
-3. 摄像机参数设置
+2. 摄像机参数修改设置
 </h3>
 
 首先使用一些常规软件获取摄像头的内参参数(例如GMLCCalibration),主要是内参matrix矩阵
 然后分别修改[camera.py](common/transformations/camera.py)和[ui.h](selfdrive/ui/ui.h)中相应摄像头的内参参数；另外根据自己的需求更改[camera.py](tools/webcam/camera.py)中的相机参数（像素和帧率，帧率最好是20的倍数，例如20,60）
 
 <h3>
-4. 数据分析
+3. 数据分析
 </h3>
 
 参考 [juggler数据分析](tools/plotjuggler/README.md)
 
+<h3>
+4. 分支管理
+</h3>
+
+|    Branch    |         explain        |
+|:------------:|:--------------------------------:|
+| `master-new` | 同步sunnypilot的master-new分支 |
+| `master-new-pc` | PC版的稳定版本分支（PC建议使用这个） |
+| `master-new-pc-dev` | PC版的开发分支（定期同步最新改动），测试通过后会合入master-new-pc |
+| `master-rk3588` | 针对rk3588的分支，具体参考RKPilot仓库 |
+
+
+<h3>
+5. 环境变量
+</h3>
+
+|    var    |         explain        |
+|:------------:|:--------------------------------:|
+| `NO_DM=1` | 禁用DM摄像头（默认启用） |
+
+<h3>
+6. 免责声明！！！
+</h3>
+
+本仓库只是用来知识共享；请遵守当地法律法规，所产生的一切后果与开发者无关！
+
+------
 ------
 <div align="center" style="text-align: center;">
 <p>
