@@ -221,7 +221,7 @@ def main(demo=False):
   cloudlog.info("modeld got CarParams: %s", CP.brand)
 
   # TODO this needs more thought, use .2s extra for now to estimate other delays
-  steer_delay = CP.steerActuatorDelay + .2
+  steer_delay = CP.steerActuatorDelay + .3
 
   DH = DesireHelper()
 
@@ -290,6 +290,7 @@ def main(demo=False):
     prepare_only = vipc_dropped_frames > 0
     if prepare_only:
       cloudlog.error(f"skipping model eval. Dropped {vipc_dropped_frames} frames")
+    prepare_only = prepare_only or run_count % 2 == 0
 
     inputs:dict[str, np.ndarray] = {
       'desire': vec_desire,

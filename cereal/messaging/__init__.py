@@ -187,7 +187,7 @@ class SubMaster:
   def _check_avg_freq(self, s: str) -> bool:
     return SERVICE_LIST[s].frequency > 0.99 and (s not in self.ignore_average_freq) and (s not in self.ignore_alive)
 
-  def update(self, timeout: int = 100) -> None:
+  def update(self, timeout: int = 200) -> None:
     msgs = []
     for sock in self.poller.poll(timeout):
       msgs.append(recv_one_or_none(sock))

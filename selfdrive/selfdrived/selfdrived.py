@@ -131,7 +131,7 @@ class SelfdriveD(CruiseHelper):
     self.personality = self.read_personality_param()
     self.recalibrating_seen = False
     self.state_machine = StateMachine()
-    self.rk = Ratekeeper(100, print_delay_threshold=None)
+    self.rk = Ratekeeper(50, print_delay_threshold=None)
 
     # Determine startup event
     self.startup_event = EventName.startup if build_metadata.openpilot.comma_remote and build_metadata.tested_channel else EventName.startupMaster
@@ -494,7 +494,7 @@ class SelfdriveD(CruiseHelper):
     self.pm.send('selfdriveState', ss_msg)
 
     # onroadEvents - logged every second or on change
-    if (self.sm.frame % int(1. / DT_CTRL) == 0) or (self.events.names != self.events_prev):
+    if (self.sm.frame % int(0.5 / DT_CTRL) == 0) or (self.events.names != self.events_prev):
       ce_send = messaging.new_message('onroadEvents', len(self.events))
       ce_send.valid = True
       ce_send.onroadEvents = self.events.to_msg()
@@ -514,7 +514,7 @@ class SelfdriveD(CruiseHelper):
     self.pm.send('selfdriveStateSP', ss_sp_msg)
 
     # onroadEventsSP - logged every second or on change
-    if (self.sm.frame % int(1. / DT_CTRL) == 0) or (self.events_sp.names != self.events_sp_prev):
+    if (self.sm.frame % int(0.5 / DT_CTRL) == 0) or (self.events_sp.names != self.events_sp_prev):
       ce_send_sp = messaging.new_message('onroadEventsSP', len(self.events_sp))
       ce_send_sp.valid = True
       ce_send_sp.onroadEventsSP = self.events_sp.to_msg()

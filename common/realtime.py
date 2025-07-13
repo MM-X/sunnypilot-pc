@@ -11,7 +11,7 @@ from openpilot.system.hardware import PC
 
 # time step for each process
 DT_CTRL = 0.01  # controlsd
-DT_MDL = 0.05  # model
+DT_MDL = 0.1  # model
 DT_HW = 0.5  # hardwared and manager
 DT_DMON = 0.05  # driver monitoring
 

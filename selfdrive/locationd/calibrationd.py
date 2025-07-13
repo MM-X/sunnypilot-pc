@@ -263,7 +263,7 @@ def main() -> NoReturn:
   calibrator = Calibrator(param_put=True)
 
   while 1:
-    timeout = 0 if sm.frame == -1 else 100
+    timeout = 0 if sm.frame == -1 else 200
     sm.update(timeout)
 
     calibrator.not_car = sm['carParams'].notCar
