@@ -11,6 +11,8 @@
 
 参考 [webcam安装步骤](tools/webcam/README.md)
 
+注意：第一次运行master-rk3588分支可能遇到Training Guide无法点击的问题，这是因为本分支修改分辨率导致的；请切换到master-new-pc分支编译启动完成Training Guide之后再切换回本分支编译启动（只会在第一次需要，后面就不需要了）
+
 <h3>
 
 <h3>
