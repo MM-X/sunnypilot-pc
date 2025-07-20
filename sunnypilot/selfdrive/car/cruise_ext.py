@@ -33,7 +33,7 @@ class VCruiseHelperSP:
 
   def update_v_cruise_delta(self, long_press: bool, v_cruise_delta: float) -> tuple[bool, float]:
     if not self.custom_acc_enabled:
-      v_cruise_delta = v_cruise_delta * (5 if long_press else 1)
+      v_cruise_delta = v_cruise_delta * (1 if long_press else 5)
       return long_press, v_cruise_delta
 
     # Apply user-specified multipliers to the base increment

@@ -36,10 +36,10 @@ X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
 J_EGO_COST = 5.0
-A_CHANGE_COST = 200.
+A_CHANGE_COST = 300.
 DANGER_ZONE_COST = 100.
 CRASH_DISTANCE = .25
-LEAD_DANGER_FACTOR = 0.75
+LEAD_DANGER_FACTOR = 0.85
 LIMIT_COST = 1e6
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
@@ -54,28 +54,28 @@ T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 2.5
-STOP_DISTANCE = 6.0
-CRUISE_MIN_ACCEL = -1.2
+STOP_DISTANCE = 4.0
+CRUISE_MIN_ACCEL = -0.8
 CRUISE_MAX_ACCEL = 1.6
 
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
     return 1.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 1.0
+    return 0.8
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 0.5
+    return 0.6
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
 
 def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 1.75
+    return 1.55
   elif personality==log.LongitudinalPersonality.standard:
-    return 1.45
+    return 1.35
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 1.25
+    return 1.15
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
