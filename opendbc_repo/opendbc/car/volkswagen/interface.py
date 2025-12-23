@@ -53,6 +53,7 @@ class CarInterface(CarInterfaceBase):
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
+      ret.networkLocation = NetworkLocation.gateway
 
       if 0x126 in fingerprint[2]:  # HCA_01
         ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
@@ -86,7 +87,7 @@ class CarInterface(CarInterfaceBase):
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stopAccel = -0.55
     ret.vEgoStarting = 0.1
-    ret.vEgoStopping = 0.5
+    ret.vEgoStopping = 0.2
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
