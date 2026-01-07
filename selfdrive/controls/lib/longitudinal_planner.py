@@ -56,6 +56,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.mpc = LongitudinalMpc(dt=dt)
     # TODO remove mpc modes when TR released
     self.mpc.mode = 'acc'
+    self.last_mode = 'acc'
+    self.mode_switch_timer = 0.0
     LongitudinalPlannerSP.__init__(self, self.CP, self.mpc)
     self.fcw = False
     self.dt = dt
@@ -94,13 +96,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
   def update(self, sm):
     mode = 'blended' if sm['selfdriveState'].experimentalMode else 'acc'
-    if not self.mlsim:
-      self.mpc.mode = mode
     LongitudinalPlannerSP.update(self, sm)
-    if dec_mpc_mode := self.get_mpc_mode():
-      mode = dec_mpc_mode
-      if not self.mlsim:
-        self.mpc.mode = dec_mpc_mode
 
     if len(sm['carControl'].orientationNED) == 3:
       accel_coast = get_coast_accel(sm['carControl'].orientationNED[1])
@@ -123,12 +119,9 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # No change cost when user is controlling the speed, or when standstill
     prev_accel_constraint = not (reset_state or sm['carState'].standstill)
 
-    if mode == 'acc':
-      accel_clip = [ACCEL_MIN, get_max_accel(v_ego)]
-      steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['liveParameters'].angleOffsetDeg
-      accel_clip = limit_accel_in_turns(v_ego, steer_angle_without_offset, accel_clip, self.CP)
-    else:
-      accel_clip = [ACCEL_MIN, ACCEL_MAX]
+    accel_clip = [ACCEL_MIN, get_max_accel(v_ego)]
+    steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['liveParameters'].angleOffsetDeg
+    accel_clip = limit_accel_in_turns(v_ego, steer_angle_without_offset, accel_clip, self.CP)
 
     if reset_state:
       self.v_desired_filter.x = v_ego
@@ -172,6 +165,26 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
                                                                         action_t=action_t, vEgoStopping=self.CP.vEgoStopping)
     output_a_target_e2e = sm['modelV2'].action.desiredAcceleration
     output_should_stop_e2e = sm['modelV2'].action.shouldStop
+
+    dynamic_experimental_control = self.CP.get_bool("DynamicExperimentalControl")
+    if dynamic_experimental_control:
+      lead_one = sm['radarState'].leadOne
+      if lead_one is not None and lead_one.status:
+        x_lead = lead_one.dRel
+        v_lead = lead_one.vLead
+        if x_lead < 10.0 or x_lead / max(v_lead, 0.1) < 3.0:
+          mode = 'acc'
+        else:
+          mode = 'blended'
+      if mode != self.last_mode:
+        self.mode_switch_timer += self.dt
+        if self.mode_switch_timer > 1.0:
+          self.mode_switch_timer = 0.0
+        else:
+          mode = self.last_mode
+      else:
+        self.mode_switch_timer = 0.0
+      self.last_mode = mode
 
     if mode == 'acc' or not self.mlsim:
       output_a_target = output_a_target_mpc
