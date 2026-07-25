@@ -2,6 +2,15 @@
 
 `replay` allows you to simulate a driving session by replaying all messages logged during the use of openpilot. This provides a way to analyze and visualize system behavior as if it were live.
 
+
+## Fillback
+- 开两个终端
+- 分别 `tools/op.sh venv`
+- `./replay 'a2a0ccea32023010|00000004--9a1ce93c08' --data_dir=./data --allow "roadEncodeIdx,roadCameraState,can,pandaStates,peripheralState"`
+- `SKIP_FW_QUERY=1 FILLBACK=1  system/manager/manager.py`
+- 等待进度条到绿色部分表示激活
+
+
 ## Setup
 
 Before starting a replay, you need to authenticate with your comma account using `auth.py`. This will allow you to access your routes from the server.

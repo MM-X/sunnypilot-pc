@@ -49,9 +49,12 @@ ALLOW="roadEncodeIdx,roadCameraState,can,pandaStates,peripheralState"
 
 # manager in background, logs redirected so the terminal stays clean for
 # replay's keyboard interaction (timeline seek/pause via keys).
-python3 system/manager/manager.py > /tmp/replay_manager.log 2>&1 &
+# ponytail: setsid puts manager in its own session; cleanup kills the whole
+# process group so the daemons manager spawned (card, controlsd, modeld, ...)
+# die with it instead of going orphan and keeping the CAN loop alive.
+setsid python3 system/manager/manager.py > ./replay_manager.log 2>&1 &
 MANAGER_PID=$!
-cleanup() { kill "$MANAGER_PID" 2>/dev/null || true; }
+cleanup() { kill -- -"$MANAGER_PID" 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
 # ponytail: fixed 5s warmup; poll msgq sockets if manager startup latency varies
