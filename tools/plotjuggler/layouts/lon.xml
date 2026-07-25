@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab tab_name="lon" containers="1">
+   <Container>
+    <DockSplitter count="3" orientation="-" sizes="0.333333;0.333333;0.333333">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="-0.841067" left="1650.243439" right="1722.287842" top="1.133697"/>
+       <limitY/>
+       <curve name="/carState/aEgo" color="#f14cc1"/>
+       <curve name="/longitudinalPlan/accels/0" color="#9467bd"/>
+       <curve name="/carControl/actuators/accel" color="#17becf"/>
+       <curve name="/carOutput/actuatorsOutput/accel" color="#d62728"/>
+       <curve name="/modelV2/action/desiredAcceleration" color="#1ac938"/>
+       <curve name="/longitudinalPlan/aTarget" color="#9467bd"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="4.801573" left="1650.240141" right="1722.284389" top="24.069880"/>
+       <limitY/>
+       <curve name="/carState/vEgo" color="#1ac938"/>
+       <curve name="/longitudinalPlan/speeds/0" color="#ff7f0e"/>
+       <curve name="/modelV2/velocity/x/0" color="#ff7f0e"/>
+       <curve name="/cameraOdometry/trans/0" color="#f14cc1"/>
+       <curve name="/carControl/hudControl/setSpeed" color="#9467bd"/>
+       <curve name="/livePose/velocityDevice/x" color="#1f77b4"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="-0.025000" left="1650.243439" right="1722.284389" top="1.025000"/>
+       <limitY/>
+       <curve name="/carControl/longActive" color="#1f77b4"/>
+       <curve name="/carState/gasPressed" color="#d69e27"/>
+       <curve name="/selfdriveState/experimentalMode" color="#d6272c"/>
+       <curve name="/longitudinalPlan/longitudinalPlanSource" color="#00dbc0"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="st" containers="1">
+   <Container>
+    <DockSplitter count="1" orientation="-" sizes="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="XYPlot" style="LinesAndDots">
+       <range bottom="-1.000000" left="-0.250000" right="10.250000" top="180.000000"/>
+       <limitY min="-1" max="180"/>
+       <curve name="st_model" color="#1ac938"/>
+       <curve name="￼st_plan" color="#1f77b4"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="vt" containers="1">
+   <Container>
+    <DockSplitter count="1" orientation="-" sizes="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="XYPlot" style="LinesAndDots">
+       <range bottom="0.000000" left="-0.250000" right="10.250000" top="36.000000"/>
+       <limitY min="0" max="36"/>
+       <curve name="vt_model" color="#17becf"/>
+       <curve name="￼vt_plan" color="#d62728"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="at" containers="1">
+   <Container>
+    <DockSplitter count="1" orientation="-" sizes="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="XYPlot" style="LinesAndDots">
+       <range bottom="-3.000000" left="-0.250000" right="10.250000" top="1.500000"/>
+       <limitY min="-3" max="1.5"/>
+       <curve name="￼at_model" color="#1f77b4"/>
+       <curve name="at_plan" color="#b4271f"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="cipv" containers="1">
+   <Container>
+    <DockSplitter count="3" orientation="-" sizes="0.333333;0.333333;0.333333">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="28.121875" left="1650.292373" right="1722.240543" top="101.753125"/>
+       <limitY/>
+       <curve name="/modelV2/leadsV3/0/x/0" color="#f14cc1"/>
+       <curve name="/modelV2/leadsV3/1/x/0" color="#17becf"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="-0.223206" left="1650.292373" right="1722.240543" top="12.658264"/>
+       <limitY/>
+       <curve name="/modelV2/leadsV3/0/v/0" color="#ff7f0e"/>
+       <curve name="/modelV2/leadsV3/1/v/0" color="#bcbd22"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range bottom="-0.816150" left="1650.292373" right="1722.240543" top="0.280505"/>
+       <limitY/>
+       <curve name="/modelV2/leadsV3/0/a/0" color="#9467bd"/>
+       <curve name="/modelV2/leadsV3/1/a/0" color="#1f77b4"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="path" containers="1">
+   <Container>
+    <DockSplitter count="1" orientation="-" sizes="1">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="XYPlot" style="LinesAndDots">
+       <range bottom="-6.000000" left="-4.800000" right="196.800000" top="6.000000"/>
+       <limitY min="-6" max="6"/>
+       <curve name="lane0" color="#17becf"/>
+       <curve name="lane1" color="#bcbd22"/>
+       <curve name="lane2" color="#1f77b4"/>
+       <curve name="lane3" color="#d62728"/>
+       <curve name="traj" color="#1ac938"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="0"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <default delimiter="0" time_axis=""/>
+  </plugin>
+  <plugin ID="DataLoad MCAP"/>
+  <plugin ID="DataLoad Rlog"/>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="Cereal Subscriber"/>
+  <plugin ID="UDP Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin ID="Fast Fourier Transform"/>
+  <plugin ID="Quaternion to RPY"/>
+  <plugin ID="Reactive Script Editor">
+   <library code="--[[ Helper function to create a series from arrays&#xa;&#xa; new_series: a series previously created with ScatterXY.new(name)&#xa; prefix:     prefix of the timeseries, before the index of the array&#xa; suffix_X:   suffix to complete the name of the series containing the X value. If [nil], use the index of the array.&#xa; suffix_Y:   suffix to complete the name of the series containing the Y value&#xa; timestamp:   usually the tracker_time variable&#xa;              &#xa; Example:&#xa; &#xa; Assuming we have multiple series in the form:&#xa; &#xa;   /trajectory/node.{X}/position/x&#xa;   /trajectory/node.{X}/position/y&#xa;   &#xa; where {N} is the index of the array (integer). We can create a reactive series from the array with:&#xa; &#xa;   new_series = ScatterXY.new(&quot;my_trajectory&quot;) &#xa;   CreateSeriesFromArray( new_series, &quot;/trajectory/node&quot;, &quot;position/x&quot;, &quot;position/y&quot;, tracker_time );&#xa;--]]&#xa;&#xa;function CreateSeriesFromArray( new_series, prefix, suffix_X, suffix_Y, timestamp )&#xa;  &#xa;  --- clear previous values&#xa;  new_series:clear()&#xa;  &#xa;  --- Append points to new_series&#xa;  index = 0&#xa;  while(true) do&#xa;&#xa;    x = index;&#xa;    -- if not nil, get the X coordinate from a series&#xa;    if suffix_X ~= nil then &#xa;      series_x = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_X) )&#xa;      if series_x == nil then break end&#xa;      x = series_x:atTime(timestamp)&#x9; &#xa;    end&#xa;    &#xa;    series_y = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_Y) )&#xa;    if series_y == nil then break end &#xa;    y = series_y:atTime(timestamp)&#xa;    &#xa;    new_series:push_back(x,y)&#xa;    index = index+1&#xa;  end&#xa;end&#xa;&#xa;--[[ Similar to the built-in function GetSeriesNames(), but select only the names with a give prefix. --]]&#xa;&#xa;function GetSeriesNamesByPrefix(prefix)&#xa;  -- GetSeriesNames(9 is a built-in function&#xa;  all_names = GetSeriesNames()&#xa;  filtered_names = {}&#xa;  for i, name in ipairs(all_names)  do&#xa;    -- check the prefix&#xa;    if name:find(prefix, 1, #prefix) then&#xa;      table.insert(filtered_names, name);&#xa;    end&#xa;  end&#xa;  return filtered_names&#xa;end&#xa;&#xa;--[[ Modify an existing series, applying offsets to all their X and Y values&#xa;&#xa; series: an existing timeseries, obtained with TimeseriesView.find(name)&#xa; delta_x: offset to apply to each x value&#xa; delta_y: offset to apply to each y value &#xa;  &#xa;--]]&#xa;&#xa;function ApplyOffsetInPlace(series, delta_x, delta_y)&#xa;  -- use C++ indeces, not Lua indeces&#xa;  for index=0, series:size()-1 do&#xa;    x,y = series:at(index)&#xa;    series:set(index, x + delta_x, y + delta_y)&#xa;  end&#xa;end&#xa;"/>
+   <scripts>
+    <script name="at_model" global="new_series = ScatterXY.new(&quot;￼at_model&quot;)&#xa;" function="new_series:clear()&#xa;index = 0&#xa;while(index &lt; 30) do&#xa;  str = string.format(&quot;/modelV2/acceleration/t/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/acceleration/x/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="at_plan" global="new_series = ScatterXY.new(&quot;at_plan&quot;)&#xa;t_series = {0.0,0.07,0.28,0.63,1.11,1.74,2.50,3.40,4.44,5.66,6.94,8.40,10.0}" function="new_series:clear()&#xa;index = 0&#xa;while(index &lt; 13) do&#xa;  str = string.format(&quot;/longitudinalPlan/accels/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = t_series[index + 1]&#xa;  y = series_y:atTime(tracker_time)&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="path" global="lane_series0 = ScatterXY.new(&quot;lane0&quot;)&#xa;lane_series1 = ScatterXY.new(&quot;lane1&quot;)&#xa;lane_series2 = ScatterXY.new(&quot;lane2&quot;)&#xa;lane_series3 = ScatterXY.new(&quot;lane3&quot;)&#xa;traj_series = ScatterXY.new(&quot;traj&quot;)" function="lane_series0:clear()&#xa;lane_series1:clear()&#xa;lane_series2:clear()&#xa;lane_series3:clear()&#xa;traj_series:clear()&#xa;index = 0&#xa;while(index &lt; 33) do&#xa;  str = string.format(&quot;/modelV2/laneLines/0/x/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/laneLines/0/y/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  lane_series0:push_back(x,y)&#xa;  &#xa;  str = string.format(&quot;/modelV2/laneLines/1/x/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/laneLines/1/y/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  lane_series1:push_back(x,y)&#xa;  &#xa;  str = string.format(&quot;/modelV2/laneLines/2/x/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/laneLines/2/y/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  lane_series2:push_back(x,y)&#xa;  &#xa;  str = string.format(&quot;/modelV2/laneLines/3/x/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/laneLines/3/y/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  lane_series3:push_back(x,y)&#xa;  &#xa;  str = string.format(&quot;/modelV2/position/x/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/position/y/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  traj_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="st_model" global="new_series = ScatterXY.new(&quot;st_model&quot;)&#xa;" function="new_series:clear()&#xa;index = 0&#xa;while(index &lt; 30) do&#xa;  str = string.format(&quot;/modelV2/position/t/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/position/x/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="st_plan" global="new_series = ScatterXY.new(&quot;￼st_plan&quot;)&#xa;t_series = {0.0,0.07,0.28,0.63,1.11,1.74,2.50,3.40,4.44,5.66,6.94,8.40,10.0}" function="new_series:clear()&#xa;index = 0&#xa;last_s = 0.0&#xa;last_t = 0.0&#xa;while(index &lt; 13) do&#xa;  str = string.format(&quot;/longitudinalPlan/speeds/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = t_series[index+1]&#xa;  last_s = last_s + series_y:atTime(tracker_time) * (x - last_t)&#xa;  last_t = x&#xa;  y = last_s&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="vt_model" global="new_series = ScatterXY.new(&quot;vt_model&quot;)&#xa;" function="new_series:clear()&#xa;index = 0&#xa;while(index &lt; 30) do&#xa;  str = string.format(&quot;/modelV2/velocity/t/%d&quot;, index) &#xa;  series_x = TimeseriesView.find( str )&#xa;  str = string.format(&quot;/modelV2/velocity/x/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_x == nil or series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = series_x:atTime(tracker_time)&#xa;  y = series_y:atTime(tracker_time)&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+    <script name="vt_plan" global="new_series = ScatterXY.new(&quot;￼vt_plan&quot;)&#xa;t_series = {0.0,0.07,0.28,0.63,1.11,1.74,2.50,3.40,4.44,5.66,6.94,8.40,10.0}" function="new_series:clear()&#xa;index = 0&#xa;while(index &lt; 13) do&#xa;  str = string.format(&quot;/longitudinalPlan/speeds/%d&quot;, index) &#xa;  series_y = TimeseriesView.find( str )&#xa;&#xa;  -- stop the loop if any of those series can't be found&#xa;  if series_y == nil then break end         &#xa;    &#xa;  --- Append points to new_series&#xa;  x = t_series[index+1]&#xa;  y = series_y:atTime(tracker_time)&#xa;  new_series:push_back(x,y)&#xa;&#xa;  index = index + 1&#xa;end -- end loop"/>
+   </scripts>
+  </plugin>
+  <plugin ID="CSV Exporter"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles>
+  <fileInfo filename="../tmpsvai76o5.rlog" prefix="">
+   <selected_datasources value=""/>
+   <plugin ID="DataLoad Rlog"/>
+  </fileInfo>
+ </previouslyLoaded_Datafiles>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+
