@@ -80,6 +80,7 @@ sunnypilot/modeld*/models/*.pkl
 
 *.bz2
 *.zst
+!tools/replay/data/**/*.zst
 
 build/
 
