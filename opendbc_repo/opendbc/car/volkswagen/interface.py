@@ -28,6 +28,7 @@ class CarInterface(CarInterfaceBase):
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
+      ret.networkLocation = NetworkLocation.gateway
 
       # The PQ port is in dashcam-only mode due to a fixed six-minute maximum timer on HCA steering. An unsupported
       # EPS flash update to work around this timer, and enable steering down to zero, is available from:
@@ -86,7 +87,7 @@ class CarInterface(CarInterfaceBase):
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stopAccel = -0.55
     ret.vEgoStarting = 0.1
-    ret.vEgoStopping = 0.5
+    ret.vEgoStopping = 0.2
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     CAN = CanBus(fingerprint=fingerprint)
