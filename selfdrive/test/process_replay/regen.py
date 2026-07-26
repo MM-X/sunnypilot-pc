@@ -10,6 +10,12 @@ from collections.abc import Iterable
 from openpilot.selfdrive.test.process_replay.process_replay import CONFIGS, FAKEDATA, ProcessConfig, replay_process, get_process_config, \
                                                                    check_openpilot_enabled, check_most_messages_valid, get_custom_params_from_lr
 from openpilot.selfdrive.test.update_ci_routes import upload_route
+from openpilot.tools.lib.local_route import local_route_path
+
+
+def _src(route, sidx, fn):
+  """Local-first source: vendored route dir, else remote Azure (CI)."""
+  return local_route_path(route, str(sidx), fn) or get_url(route, str(sidx), fn)
 from openpilot.tools.lib.framereader import FrameReader
 from openpilot.tools.lib.logreader import LogReader, LogIterable, save_log
 from openpilot.tools.lib.openpilotci import get_url
@@ -33,19 +39,20 @@ def regen_segment(
 def setup_data_readers(
     route: str, sidx: int, needs_driver_cam: bool = True, needs_road_cam: bool = True, dummy_driver_cam: bool = False
 ) -> tuple[LogReader, dict[str, Any]]:
-  lr = LogReader(f"{route}/{sidx}/r")
+  local_rlog = local_route_path(route, str(sidx), "rlog.zst")
+  lr = LogReader(local_rlog or f"{route}/{sidx}/r")
   frs = {}
   if needs_road_cam:
-    frs['roadCameraState'] = FrameReader(get_url(route, str(sidx), "fcamera.hevc"))
+    frs['roadCameraState'] = FrameReader(_src(route, sidx, "fcamera.hevc"))
     if next((True for m in lr if m.which() == "wideRoadCameraState"), False):
-      frs['wideRoadCameraState'] = FrameReader(get_url(route, str(sidx), "ecamera.hevc"))
+      frs['wideRoadCameraState'] = FrameReader(_src(route, sidx, "ecamera.hevc"))
   if needs_driver_cam:
     if dummy_driver_cam:
-      frs['driverCameraState'] = FrameReader(get_url(route, str(sidx), "fcamera.hevc")) # Use fcam as dummy
+      frs['driverCameraState'] = FrameReader(_src(route, sidx, "fcamera.hevc")) # Use fcam as dummy
     else:
       device_type = next(str(msg.initData.deviceType) for msg in lr if msg.which() == "initData")
       assert device_type != "neo", "Driver camera not supported on neo segments. Use dummy dcamera."
-      frs['driverCameraState'] = FrameReader(get_url(route, str(sidx), "dcamera.hevc"))
+      frs['driverCameraState'] = FrameReader(_src(route, sidx, "dcamera.hevc"))
 
   return lr, frs
 

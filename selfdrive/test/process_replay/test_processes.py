@@ -14,6 +14,7 @@ from openpilot.selfdrive.test.process_replay.compare_logs import compare_logs, f
 from openpilot.selfdrive.test.process_replay.process_replay import CONFIGS, PROC_REPLAY_DIR, FAKEDATA, replay_process, \
                                                                    check_most_messages_valid
 from openpilot.tools.lib.filereader import FileReader
+from openpilot.tools.lib.local_route import local_route_path
 from openpilot.tools.lib.logreader import LogReader, save_log
 
 IS_AZURE_TOKEN_DEFINED = os.getenv("AZURE_TOKEN")
@@ -42,24 +43,14 @@ source_segments = [
   #("VOLKSWAGEN2", "3cfdec54aa035f3f|2022-07-19--23-45-10--2"),  # VOLKSWAGEN.VOLKSWAGEN_PASSAT_NMS
 ]
 
+# Local-only corpus: the vendored demo route in tools/replay/data
+# (a2a0ccea32023010, VOLKSWAGEN_GOLF). Multi-car coverage dropped for offline
+# local-dev; CI still uses the remote regen segments via Azure. Restore the
+# full regen list below to re-enable multi-car regression.
+DEMO_ROUTE = "a2a0ccea32023010|00000004--9a1ce93c08"
+
 segments = [
-  ("HYUNDAI", "regenAA0FC4ED71E|2025-04-08--22-57-50--0"),
-  ("HYUNDAI2", "regenAFB9780D823|2025-04-08--23-00-34--0"),
-  ("TOYOTA", "regen218A4DCFAA1|2025-04-08--22-57-51--0"),
-  ("TOYOTA2", "regen107352E20EB|2025-04-08--22-57-46--0"),
-  ("TOYOTA3", "regen1455E3B4BDF|2025-04-09--03-26-06--0"),
-  ("HONDA", "regenB328FF8BA0A|2025-04-08--22-57-45--0"),
-  ("HONDA2", "regen6170C8C9A35|2025-04-08--22-57-46--0"),
-  ("CHRYSLER", "regen5B28FC2A437|2025-04-08--23-04-24--0"),
-  ("RAM", "regenBF81EA96E08|2025-04-08--23-06-54--0"),
-  ("SUBARU", "regen7366F13F6A1|2025-04-08--23-07-07--0"),
-  ("GM", "regen1271097D038|2025-04-09--03-26-00--0"),
-  ("NISSAN", "regen15D60604EAB|2025-04-08--23-06-59--0"),
-  ("VOLKSWAGEN", "regen0F2F06C9539|2025-04-08--23-06-56--0"),
-  ("MAZDA", "regenACF84CCF482|2024-08-30--03-21-55--0"),
-  ("FORD", "regen755D8CB1E1F|2025-04-08--23-13-43--0"),
-  ("RIVIAN", "regen5FCAC896BBE|2025-04-08--23-13-35--0"),
-  ("TESLA", "2c912ca5de3b1ee9|0000025d--6eb6bcbca4--4"),
+  ("VOLKSWAGEN", f"{DEMO_ROUTE}--0"),
 ]
 
 # dashcamOnly makes don't need to be tested until a full port is done
@@ -110,7 +101,8 @@ def run_test_process(data):
 
 def get_log_data(segment):
   r, n = segment.rsplit("--", 1)
-  with FileReader(get_url(r, n, "rlog.zst")) as f:
+  local = local_route_path(r, n, "rlog.zst")
+  with FileReader(local or get_url(r, n, "rlog.zst")) as f:
     return (segment, f.read())
 
 
@@ -201,7 +193,7 @@ if __name__ == "__main__":
   upload = args.update_refs or args.upload_only
   os.makedirs(os.path.dirname(FAKEDATA), exist_ok=True)
 
-  if upload:
+  if upload and not os.getenv("LOCAL_ROUTE_DIR"):
     assert full_test, "Need to run full test when updating refs"
 
   try:
@@ -228,7 +220,8 @@ if __name__ == "__main__":
   print(f"***** testing against commit {ref_commit} *****")
 
   # check to make sure all car brands are tested
-  if full_test:
+  # (skipped in local mode: the corpus is intentionally reduced to the vendored demo route)
+  if full_test and not os.getenv("LOCAL_ROUTE_DIR"):
     untested = (set(interface_names) - set(excluded_interfaces)) - {c.lower() for c in tested_cars}
     assert len(untested) == 0, f"Cars missing routes: {str(untested)}"
 

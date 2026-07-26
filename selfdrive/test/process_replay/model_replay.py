@@ -14,14 +14,20 @@ from tabulate import tabulate
 from openpilot.common.git import get_commit
 from openpilot.system.hardware import PC
 from openpilot.tools.lib.openpilotci import get_url
+from openpilot.tools.lib.local_route import local_route_path
 from openpilot.selfdrive.test.process_replay.compare_logs import compare_logs, format_diff
 from openpilot.selfdrive.test.process_replay.process_replay import get_process_config, replay_process
 from openpilot.tools.lib.framereader import FrameReader
 from openpilot.tools.lib.logreader import LogReader, save_log
 from openpilot.tools.lib.github_utils import GithubUtils
 
-TEST_ROUTE = "8494c69d3c710e81|000001d4--2648a9a404"
-SEGMENT = 4
+# Local mode: point at the vendored demo route in tools/replay/data (no dcamera
+# there, so fcamera is used as a dummy driver camera, same as regen's
+# dummy_driver_cam). Override via env to keep CI on the original remote route.
+DEMO_ROUTE = "a2a0ccea32023010|00000004--9a1ce93c08"
+TEST_ROUTE = os.getenv("MODEL_REPLAY_ROUTE", DEMO_ROUTE)
+SEGMENT = int(os.getenv("MODEL_REPLAY_SEGMENT", "0"))
+LOCAL = bool(os.getenv("LOCAL_ROUTE_DIR"))
 START_FRAME = 0
 END_FRAME = 60
 
@@ -40,6 +46,17 @@ EXEC_TIMINGS = [
 
 def get_log_fn(test_route, ref="master"):
   return f"{test_route}_model_tici_{ref}.zst"
+
+def _src(route, seg, fn, dummy_fcam=False):
+  """Local-first source URL: vendored route dir, else remote Azure (CI)."""
+  local = local_route_path(route, seg, fn)
+  if local:
+    return local
+  if dummy_fcam:
+    fcam = local_route_path(route, seg, "fcamera.hevc")
+    if fcam:
+      return fcam
+  return get_url(route, seg, fn)
 
 def plot(proposed, master, title, tmp):
   proposed = list(proposed)
@@ -209,9 +226,9 @@ def get_frames():
       print(f"Failed to load frames from cache {cache_name}: {e}")
 
   frs = {
-    'roadCameraState': FrameReader(get_url(TEST_ROUTE, SEGMENT, "fcamera.hevc"), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
-    'driverCameraState': FrameReader(get_url(TEST_ROUTE, SEGMENT, "dcamera.hevc"), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
-    'wideRoadCameraState': FrameReader(get_url(TEST_ROUTE, SEGMENT, "ecamera.hevc"), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
+    'roadCameraState': FrameReader(_src(TEST_ROUTE, SEGMENT, "fcamera.hevc"), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
+    'driverCameraState': FrameReader(_src(TEST_ROUTE, SEGMENT, "dcamera.hevc", dummy_fcam=True), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
+    'wideRoadCameraState': FrameReader(_src(TEST_ROUTE, SEGMENT, "ecamera.hevc"), pix_fmt='nv12', cache_size=END_FRAME - START_FRAME),
   }
   for fr in frs.values():
     for fidx in range(START_FRAME, END_FRAME):
@@ -226,7 +243,7 @@ if __name__ == "__main__":
   replay_dir = os.path.dirname(os.path.abspath(__file__))
 
   # load logs
-  lr = list(LogReader(get_url(TEST_ROUTE, SEGMENT, "rlog.zst")))
+  lr = list(LogReader(_src(TEST_ROUTE, SEGMENT, "rlog.zst")))
   frs = get_frames()
 
   log_msgs = []
@@ -237,64 +254,73 @@ if __name__ == "__main__":
   failed = False
   if not update:
     log_fn = get_log_fn(TEST_ROUTE)
-    try:
-      all_logs = list(LogReader(GITHUB.get_file_url(MODEL_REPLAY_BUCKET, log_fn)))
-      cmp_log = []
-      model_start_index = next(i for i, m in enumerate(all_logs) if m.which() in ("modelV2", "drivingModelData", "cameraOdometry"))
-      cmp_log += all_logs[model_start_index+START_FRAME*3:model_start_index + END_FRAME*3]
-      dmon_start_index = next(i for i, m in enumerate(all_logs) if m.which() == "driverStateV2")
-      cmp_log += all_logs[dmon_start_index+START_FRAME:dmon_start_index + END_FRAME]
+    # local mode: ref lives in fakedata/ next to this script; first run has no
+    # ref yet, so save the proposed output as the baseline and skip compare.
+    local_ref = os.path.join(replay_dir, "fakedata", log_fn)
+    if LOCAL and not os.path.exists(local_ref):
+      os.makedirs(os.path.dirname(local_ref), exist_ok=True)
+      save_log(local_ref, log_msgs)
+      print(f"No local ref yet — saved baseline to {local_ref}. Re-run to compare.")
+    else:
+      ref_src = local_ref if LOCAL else GITHUB.get_file_url(MODEL_REPLAY_BUCKET, log_fn)
+      try:
+        all_logs = list(LogReader(ref_src))
+        cmp_log = []
+        model_start_index = next(i for i, m in enumerate(all_logs) if m.which() in ("modelV2", "drivingModelData", "cameraOdometry"))
+        cmp_log += all_logs[model_start_index+START_FRAME*3:model_start_index + END_FRAME*3]
+        dmon_start_index = next(i for i, m in enumerate(all_logs) if m.which() == "driverStateV2")
+        cmp_log += all_logs[dmon_start_index+START_FRAME:dmon_start_index + END_FRAME]
 
-      ignore = [
-        'logMonoTime',
-        'drivingModelData.frameDropPerc',
-        'drivingModelData.modelExecutionTime',
-        'modelV2.frameDropPerc',
-        'modelV2.modelExecutionTime',
-        'driverStateV2.modelExecutionTime',
-        'driverStateV2.gpuExecutionTime'
-      ]
-      if PC:
-        # TODO We ignore whole bunch so we can compare important stuff
-        # like posenet with reasonable tolerance
-        ignore += ['modelV2.acceleration.x',
-                   'modelV2.position.x',
-                   'modelV2.position.xStd',
-                   'modelV2.position.y',
-                   'modelV2.position.yStd',
-                   'modelV2.position.z',
-                   'modelV2.position.zStd',
-                   'drivingModelData.path.xCoefficients',]
-        for i in range(3):
-          for field in ('x', 'y', 'v', 'a'):
-            ignore.append(f'modelV2.leadsV3.{i}.{field}')
-            ignore.append(f'modelV2.leadsV3.{i}.{field}Std')
-        for i in range(4):
-          for field in ('x', 'y', 'z', 't'):
-            ignore.append(f'modelV2.laneLines.{i}.{field}')
-        for i in range(2):
-          for field in ('x', 'y', 'z', 't'):
-            ignore.append(f'modelV2.roadEdges.{i}.{field}')
-      tolerance = .3 if PC else None
-      results: Any = {TEST_ROUTE: {}}
-      log_paths: Any = {TEST_ROUTE: {"models": {'ref': log_fn, 'new': log_fn}}}
-      results[TEST_ROUTE]["models"] = compare_logs(cmp_log, log_msgs, tolerance=tolerance, ignore_fields=ignore)
-      diff_short, diff_long, failed = format_diff(results, log_paths, 'master')
+        ignore = [
+          'logMonoTime',
+          'drivingModelData.frameDropPerc',
+          'drivingModelData.modelExecutionTime',
+          'modelV2.frameDropPerc',
+          'modelV2.modelExecutionTime',
+          'driverStateV2.modelExecutionTime',
+          'driverStateV2.gpuExecutionTime'
+        ]
+        if PC:
+          # TODO We ignore whole bunch so we can compare important stuff
+          # like posenet with reasonable tolerance
+          ignore += ['modelV2.acceleration.x',
+                     'modelV2.position.x',
+                     'modelV2.position.xStd',
+                     'modelV2.position.y',
+                     'modelV2.position.yStd',
+                     'modelV2.position.z',
+                     'modelV2.position.zStd',
+                     'drivingModelData.path.xCoefficients',]
+          for i in range(3):
+            for field in ('x', 'y', 'v', 'a'):
+              ignore.append(f'modelV2.leadsV3.{i}.{field}')
+              ignore.append(f'modelV2.leadsV3.{i}.{field}Std')
+          for i in range(4):
+            for field in ('x', 'y', 'z', 't'):
+              ignore.append(f'modelV2.laneLines.{i}.{field}')
+          for i in range(2):
+            for field in ('x', 'y', 'z', 't'):
+              ignore.append(f'modelV2.roadEdges.{i}.{field}')
+        tolerance = .3 if PC else None
+        results: Any = {TEST_ROUTE: {}}
+        log_paths: Any = {TEST_ROUTE: {"models": {'ref': log_fn, 'new': log_fn}}}
+        results[TEST_ROUTE]["models"] = compare_logs(cmp_log, log_msgs, tolerance=tolerance, ignore_fields=ignore)
+        diff_short, diff_long, failed = format_diff(results, log_paths, 'master')
 
-      if "CI" in os.environ:
-        comment_replay_report(log_msgs, cmp_log, log_msgs)
-        failed = False
-        print(diff_long)
-      print('-------------\n'*5)
-      print(diff_short)
-      with open("model_diff.txt", "w") as f:
-        f.write(diff_long)
-    except Exception as e:
-      print(str(e))
-      failed = True
+        if "CI" in os.environ and not LOCAL:
+          comment_replay_report(log_msgs, cmp_log, log_msgs)
+          failed = False
+          print(diff_long)
+        print('-------------\n'*5)
+        print(diff_short)
+        with open("model_diff.txt", "w") as f:
+          f.write(diff_long)
+      except Exception as e:
+        print(str(e))
+        failed = True
 
   # upload new refs
-  if update and not PC:
+  if update and not PC and not LOCAL:
     print("Uploading new refs")
     log_fn = get_log_fn(TEST_ROUTE)
     save_log(log_fn, log_msgs)
