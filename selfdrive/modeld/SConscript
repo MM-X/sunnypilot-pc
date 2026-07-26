@@ -10,10 +10,13 @@ from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.selfdrive.modeld.helpers import TG_INPUT_DEVICES_PATH, usbgpu_present, modeld_pkl_path
 
 
+PC = not os.path.isfile('/TICI')
 CAMERA_CONFIGS = [
   (_ar_ox_fisheye.width, _ar_ox_fisheye.height),  # tici: 1928x1208
   (_os_fisheye.width, _os_fisheye.height),        # mici: 1344x760
 ]
+if PC:
+  CAMERA_CONFIGS.append((1280, 720))              # pc webcam (tools/webcam)
 
 Import('env', 'arch')
 chunker_file = File("#openpilot/common/file_chunker.py")

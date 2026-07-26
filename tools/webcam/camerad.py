@@ -10,7 +10,7 @@ from cereal import messaging
 from openpilot.tools.webcam.camera import Camera
 from openpilot.common.realtime import Ratekeeper
 
-ROAD_CAM = os.getenv("ROAD_CAM", "0")
+ROAD_CAM = os.getenv("ROAD_CAM", "11")
 WIDE_CAM = os.getenv("WIDE_CAM")
 DRIVER_CAM = os.getenv("DRIVER_CAM")
 

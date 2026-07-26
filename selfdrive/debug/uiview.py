@@ -4,7 +4,7 @@ import time
 from cereal import car, log, messaging
 from openpilot.common.params import Params
 from openpilot.system.manager.process_config import managed_processes, is_snpe_model, is_tinygrad_model, is_stock_model
-from openpilot.system.hardware import HARDWARE
+from openpilot.system.hardware import HARDWARE, PC
 
 if __name__ == "__main__":
   CP = car.CarParams(notCar=True, wheelbase=1, steerRatio=10)
@@ -20,8 +20,12 @@ if __name__ == "__main__":
 
   HARDWARE.set_power_save(False)
 
-  procs = ['webcamerad', 'ui', 'calibrationd', 'plannerd']
-  procs += ["modeld_snpe" if use_snpe_modeld else "modeld_tinygrad" if use_tinygrad_modeld else "modeld"]
+  procs = ['ui', 'calibrationd', 'plannerd']
+  if PC:
+    procs += ["webcamerad"]
+  else:
+    procs += ["camerad"]
+  procs += ["modeld"]
   for p in procs:
     managed_processes[p].start()
 
