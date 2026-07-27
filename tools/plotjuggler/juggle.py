@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import glob
 import platform
 import shutil
 import subprocess
@@ -48,6 +49,47 @@ def install():
 
     with tarfile.open(tmp.name) as tar:
       tar.extractall(path=INSTALL_DIR)
+
+  if platform.system() == "Darwin":
+    relink_macos_capnp()
+
+
+def relink_macos_capnp():
+  """Point the capnp-linked plugins at whatever libcapnp Homebrew actually has.
+
+  The macOS release doesn't bundle its dependencies, so the plugins hardcode an
+  absolute path to one specific libcapnp version. Homebrew rarely has that exact
+  version, and when it doesn't the plugins silently fail to load: rlog files then
+  have no loader and PlotJuggler segfaults on open. The Linux release bundles its
+  own .so files (found via LD_LIBRARY_PATH above), so this only applies here.
+  """
+  libdir = "/opt/homebrew/opt/capnp/lib"
+  libs = ("libcapnp", "libcapnpc", "libkj")
+
+  installed = {}
+  for lib in libs:
+    found = glob.glob(os.path.join(libdir, f"{lib}.*.*.*.dylib"))
+    if len(found) != 1:
+      cloudlog.warning(f"skipping capnp relink: expected one {lib} in {libdir}, found {len(found)}")
+      return
+    installed[lib] = found[0]
+
+  for plugin in ("libDataLoadRlog.dylib", "libDataStreamCereal.dylib"):
+    path = os.path.join(INSTALL_DIR, plugin)
+    if not os.path.exists(path):
+      continue
+
+    changes = []
+    for dep in subprocess.check_output(["otool", "-L", path], encoding="utf-8").splitlines():
+      dep = dep.strip().split(" ")[0]
+      lib = os.path.basename(dep).split(".")[0]
+      if os.path.dirname(dep) == libdir and lib in installed and dep != installed[lib]:
+        changes += ["-change", dep, installed[lib]]
+
+    if changes:
+      # editing the Mach-O header invalidates the signature, so re-sign ad-hoc
+      subprocess.check_call(["install_name_tool", *changes, path])
+      subprocess.check_call(["codesign", "--force", "--sign", "-", path])
 
 
 def get_plotjuggler_version():
