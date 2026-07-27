@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -19,6 +20,8 @@ struct LoggerdState {
   std::atomic<int> ready_to_rotate{0};  // count of encoders ready to rotate
   int max_waiting = 0;
   double last_rotate_tms = 0.;      // last rotate time in ms
+  int last_ready_to_rotate = 0;     // ready_to_rotate at last change
+  double last_ready_change_tms = 0.;  // when ready_to_rotate last changed
 };
 
 void logger_rotate(LoggerdState *s) {
@@ -26,6 +29,8 @@ void logger_rotate(LoggerdState *s) {
   assert(ret);
   s->ready_to_rotate = 0;
   s->last_rotate_tms = millis_since_boot();
+  s->last_ready_to_rotate = 0;
+  s->last_ready_change_tms = s->last_rotate_tms;
   LOGW((s->logger.segment() == 0) ? "logging to %s" : "rotated to %s", s->logger.segmentPath().c_str());
 }
 
@@ -37,11 +42,23 @@ void rotate_if_needed(LoggerdState *s) {
   bool timed_out = false;
   double tms = millis_since_boot();
   double seg_length_secs = (tms - s->last_rotate_tms) / 1000.;
+
+  // track when the ready count last moved, so we can detect a stalled rotation
+  if (s->ready_to_rotate != s->last_ready_to_rotate) {
+    s->last_ready_to_rotate = s->ready_to_rotate;
+    s->last_ready_change_tms = tms;
+  }
+
   if ((seg_length_secs > SEGMENT_LENGTH) && !LOGGERD_TEST) {
     // TODO: might be nice to put these reasons in the sentinel
     if ((tms - s->last_camera_seen_tms) > NO_CAMERA_PATIENCE) {
       timed_out = true;
       LOGE("no camera packets seen. auto rotating");
+    } else if ((s->ready_to_rotate > 0) && ((tms - s->last_ready_change_tms) > STALLED_ROTATE_PATIENCE)) {
+      // some encoders rotated but the rest never will (dead encoder, stream not
+      // published, ...). don't wait out the full timeout and drop frames.
+      timed_out = true;
+      LOGE("rotation stalled at %d/%d encoders. auto rotating", s->ready_to_rotate.load(), s->max_waiting);
     } else if (seg_length_secs > SEGMENT_LENGTH*1.2) {
       timed_out = true;
       LOGE("segment too long. auto rotating");
@@ -259,10 +276,25 @@ void loggerd_thread() {
 
   std::map<std::string, EncoderInfo> encoder_infos_dict;
   std::vector<RemoteEncoder*> encoders_with_audio;
+
+  // only wait on encoders whose camera stream camerad actually publishes. counting
+  // disabled cameras would make ready_to_rotate never reach max_waiting, stalling
+  // every rotation until the timeout and dropping frames in the meantime.
+  std::set<VisionStreamType> streams;
+  for (int i = 0; i < 100 && !do_exit; ++i) {
+    streams = VisionIpcClient::getAvailableStreams("camerad", false);
+    if (!streams.empty()) break;
+    util::sleep_for(100);
+  }
+  if (streams.empty()) {
+    LOGE("no camerad streams found, waiting on all encoders");
+  }
+
   for (const auto &cam : cameras_logged) {
+    const bool active = streams.empty() || streams.count(cam.stream_type) > 0;
     for (const auto &encoder_info : cam.encoder_infos) {
       encoder_infos_dict[encoder_info.publish_name] = encoder_info;
-      s.max_waiting++;
+      if (active) s.max_waiting++;
     }
   }
 

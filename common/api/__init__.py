@@ -20,3 +20,7 @@ class Api:
 
 def api_get(endpoint, method='GET', timeout=None, access_token=None, **params):
   return CommaConnectApi(None).api_get(endpoint, method, timeout, access_token, **params)
+
+def get_key_pair() -> tuple[str, str, str] | tuple[None, None, None]:
+  return CommaConnectApi(None).get_key_pair()
+

@@ -59,7 +59,9 @@ const CameraConfig DRIVER_CAMERA_CONFIG = {
   .focal_len = 1.71,
   .publish_name = "driverCameraState",
   .init_camera_state = &cereal::Event::Builder::initDriverCameraState,
-  .enabled = !getenv("DISABLE_DRIVER"),
+  // driver monitoring is disabled on this branch (see CLAUDE.md §4), so the
+  // driver camera is never opened. ENABLE_DRIVER re-enables it if needed.
+  .enabled = (bool)getenv("ENABLE_DRIVER"),
   .phy = CAM_ISP_IFE_IN_RES_PHY_2,
   .vignetting_correction = false,
   .output_type = ISP_BPS_PROCESSED,
