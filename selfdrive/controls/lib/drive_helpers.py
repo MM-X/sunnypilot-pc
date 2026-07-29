@@ -47,8 +47,9 @@ def get_accel_from_plan(speeds, accels, t_idxs, action_t=DT_MDL, vEgoStopping=0.
     if action_t < MIN_STABLE_DELAY:
       v_target = v_now + (action_t / MIN_STABLE_DELAY) * (np.interp(MIN_STABLE_DELAY, t_idxs, speeds) - v_now)
     else:
-      v_target = np.interp(action_t, t_idxs, speeds)
-    a_target = 2 * (v_target - v_now) / (action_t) - a_now
+      v_target = np.interp(action_t + MIN_STABLE_DELAY, t_idxs, speeds)
+      v_now = np.interp(MIN_STABLE_DELAY, t_idxs, speeds)
+    a_target = (v_target - v_now) / (action_t)
   else:
     v_now = 0.0
     v_target = 0.0

@@ -39,7 +39,7 @@ J_EGO_COST = 5.0
 A_CHANGE_COST = 300.
 DANGER_ZONE_COST = 100.
 CRASH_DISTANCE = .25
-LEAD_DANGER_FACTOR = 0.75
+LEAD_DANGER_FACTOR = 0.65
 LIMIT_COST = 1e6
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
@@ -72,11 +72,11 @@ def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
 
 def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 1.55
-  elif personality==log.LongitudinalPersonality.standard:
     return 1.35
-  elif personality==log.LongitudinalPersonality.aggressive:
+  elif personality==log.LongitudinalPersonality.standard:
     return 1.15
+  elif personality==log.LongitudinalPersonality.aggressive:
+    return 1.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 

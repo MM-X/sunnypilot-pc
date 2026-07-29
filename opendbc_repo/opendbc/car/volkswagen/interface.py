@@ -89,7 +89,7 @@ class CarInterface(CarInterfaceBase):
     ret.vEgoStarting = 0.1
     ret.vEgoStopping = 0.2
     ret.autoResumeSng = ret.minEnableSpeed == -1
-    ret.longitudinalActuatorDelay = 0.4
+    ret.longitudinalActuatorDelay = 0.35
 
     CAN = CanBus(fingerprint=fingerprint)
     if CAN.pt >= 4:

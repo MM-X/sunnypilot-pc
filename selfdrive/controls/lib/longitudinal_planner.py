@@ -94,13 +94,12 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
   def update(self, sm):
     mode = 'blended' if sm['selfdriveState'].experimentalMode else 'acc'
-    if not self.mlsim:
-      self.mpc.mode = mode
+    # self.mpc.mode = mode
     LongitudinalPlannerSP.update(self, sm)
-    if dec_mpc_mode := self.get_mpc_mode():
-      mode = dec_mpc_mode
-      if not self.mlsim:
-        self.mpc.mode = dec_mpc_mode
+    # if dec_mpc_mode := self.get_mpc_mode():
+    #   mode = dec_mpc_mode
+    #   if not self.mlsim:
+    #     self.mpc.mode = dec_mpc_mode
 
     if len(sm['carControl'].orientationNED) == 3:
       accel_coast = get_coast_accel(sm['carControl'].orientationNED[1])
@@ -125,10 +124,10 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     if mode == 'acc':
       accel_clip = [ACCEL_MIN, get_max_accel(v_ego)]
-      steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['liveParameters'].angleOffsetDeg
-      accel_clip = limit_accel_in_turns(v_ego, steer_angle_without_offset, accel_clip, self.CP)
     else:
       accel_clip = [ACCEL_MIN, ACCEL_MAX]
+    steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['liveParameters'].angleOffsetDeg
+    accel_clip = limit_accel_in_turns(v_ego, steer_angle_without_offset, accel_clip, self.CP)
 
     if reset_state:
       self.v_desired_filter.x = v_ego
@@ -173,7 +172,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     output_a_target_e2e = sm['modelV2'].action.desiredAcceleration
     output_should_stop_e2e = sm['modelV2'].action.shouldStop
 
-    if mode == 'acc' or not self.mlsim:
+    if mode == 'acc':
       output_a_target = output_a_target_mpc
       self.output_should_stop = output_should_stop_mpc
     else:
