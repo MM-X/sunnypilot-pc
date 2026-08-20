@@ -2,6 +2,7 @@
 import os
 import pickle
 import sys
+import copy
 from collections import defaultdict
 from typing import Any
 import tempfile
@@ -17,6 +18,7 @@ from openpilot.tools.lib.openpilotci import get_url
 from openpilot.tools.lib.local_route import local_route_path
 from openpilot.selfdrive.test.process_replay.compare_logs import compare_logs, format_diff
 from openpilot.selfdrive.test.process_replay.process_replay import get_process_config, replay_process
+from openpilot.system.manager.process_config import managed_processes
 from openpilot.tools.lib.framereader import FrameReader
 from openpilot.tools.lib.logreader import LogReader, save_log
 from openpilot.tools.lib.github_utils import GithubUtils
@@ -27,6 +29,8 @@ from openpilot.tools.lib.github_utils import GithubUtils
 DEMO_ROUTE = "a2a0ccea32023010|00000004--9a1ce93c08"
 TEST_ROUTE = os.getenv("MODEL_REPLAY_ROUTE", DEMO_ROUTE)
 SEGMENT = int(os.getenv("MODEL_REPLAY_SEGMENT", "0"))
+# which managed process to launch as modeld (e.g. MODELD_PROC=modeld098 for the legacy split model)
+MODELD_PROC = os.getenv("MODELD_PROC", "modeld")
 LOCAL = bool(os.getenv("LOCAL_ROUTE_DIR"))
 START_FRAME = 0
 END_FRAME = 60
@@ -179,12 +183,16 @@ def model_replay(lr, frs):
     dmodeld_logs.insert(1, msg.as_reader())
 
   modeld = get_process_config("modeld")
-  dmonitoringmodeld = get_process_config("dmonitoringmodeld")
+  if MODELD_PROC != "modeld":
+    managed_processes["modeld"] = copy.deepcopy(managed_processes[MODELD_PROC])
 
   modeld_msgs = replay_process(modeld, modeld_logs, frs)
-  dmonitoringmodeld_msgs = replay_process(dmonitoringmodeld, dmodeld_logs, frs)
 
-  msgs = modeld_msgs + dmonitoringmodeld_msgs
+  msgs = modeld_msgs
+  # demo route has no driver cam; skip dmonitoringmodeld when unregistered or no dcam frames
+  if "dmonitoringmodeld" in managed_processes and any(m.which() == "driverCameraState" for m in lr):
+    dmonitoringmodeld = get_process_config("dmonitoringmodeld")
+    msgs += replay_process(dmonitoringmodeld, dmodeld_logs, frs)
 
   header = ['model', 'max instant', 'max instant allowed', 'average', 'max average allowed', 'test result']
   rows = []
@@ -193,6 +201,10 @@ def model_replay(lr, frs):
     ts = [getattr(m, s).modelExecutionTime for m in msgs if m.which() == s]
     # TODO some init can happen in first iteration
     ts = ts[1:]
+
+    if not len(ts):
+      rows.append([s, "-", instant_max, "-", avg_max, "skipped"])
+      continue
 
     errors = []
     if np.max(ts) > instant_max:
@@ -256,7 +268,9 @@ if __name__ == "__main__":
     log_fn = get_log_fn(TEST_ROUTE)
     # local mode: ref lives in fakedata/ next to this script; first run has no
     # ref yet, so save the proposed output as the baseline and skip compare.
-    local_ref = os.path.join(replay_dir, "fakedata", log_fn)
+    # Name the ref by process so alternate models (MODELD_PROC) get their own baseline.
+    ref_fn = log_fn.replace("_model_tici_", f"_model_{MODELD_PROC}_tici_")
+    local_ref = os.path.join(replay_dir, "fakedata", ref_fn)
     if LOCAL and not os.path.exists(local_ref):
       os.makedirs(os.path.dirname(local_ref), exist_ok=True)
       save_log(local_ref, log_msgs)
@@ -268,8 +282,10 @@ if __name__ == "__main__":
         cmp_log = []
         model_start_index = next(i for i, m in enumerate(all_logs) if m.which() in ("modelV2", "drivingModelData", "cameraOdometry"))
         cmp_log += all_logs[model_start_index+START_FRAME*3:model_start_index + END_FRAME*3]
-        dmon_start_index = next(i for i, m in enumerate(all_logs) if m.which() == "driverStateV2")
-        cmp_log += all_logs[dmon_start_index+START_FRAME:dmon_start_index + END_FRAME]
+        # demo route has no driver cam; skip dmon compare when absent from ref
+        if any(m.which() == "driverStateV2" for m in all_logs):
+          dmon_start_index = next(i for i, m in enumerate(all_logs) if m.which() == "driverStateV2")
+          cmp_log += all_logs[dmon_start_index+START_FRAME:dmon_start_index + END_FRAME]
 
         ignore = [
           'logMonoTime',

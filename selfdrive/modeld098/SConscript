@@ -1,0 +1,74 @@
+import glob
+import os
+import sys, subprocess
+
+Import('env', 'envCython', 'arch', 'cereal', 'messaging', 'common', 'gpucommon', 'visionipc', 'transformations')
+lenv = env.Clone()
+lenvCython = envCython.Clone()
+
+libs = [cereal, messaging, visionipc, gpucommon, common, 'capnp', 'kj', 'pthread']
+frameworks = []
+
+common_src = [
+  "models/commonmodel.cc",
+  "transforms/loadyuv.cc",
+  "transforms/transform.cc",
+]
+
+
+# OpenCL is a framework on Mac
+if arch == "Darwin":
+  frameworks += ['OpenCL']
+else:
+  libs += ['OpenCL']
+
+# Set path definitions
+for pathdef, fn in {'TRANSFORM': 'transforms/transform.cl', 'LOADYUV': 'transforms/loadyuv.cl'}.items():
+  for xenv in (lenv, lenvCython):
+    xenv['CXXFLAGS'].append(f'-D{pathdef}_PATH=\\"{File(fn).abspath}\\"')
+
+# Compile cython
+cython_libs = envCython["LIBS"] + libs
+commonmodel_lib = lenv.Library('commonmodel', common_src)
+lenvCython.Program('models/commonmodel_pyx.so', 'models/commonmodel_pyx.pyx', LIBS=[commonmodel_lib, *cython_libs], FRAMEWORKS=frameworks)
+tinygrad_files = ["#"+x for x in glob.glob(env.Dir("#tinygrad_repo").relpath + "/**", recursive=True, root_dir=env.Dir("#").abspath) if 'pycache' not in x]
+
+# Get model metadata
+for model_name in ['driving_vision', 'driving_policy']:
+  fn = File(f"models/{model_name}").abspath
+  script_files = [File(Dir("#selfdrive/modeld098").File("get_model_metadata.py").abspath)]
+  cmd = f'python3 {Dir("#selfdrive/modeld098").abspath}/get_model_metadata.py {fn}.onnx'
+  lenv.Command(fn + "_metadata.pkl", [fn + ".onnx"] + tinygrad_files + script_files, cmd)
+
+# Compile tinygrad model; flags must match selfdrive/modeld/SConscript so the runtime DEV
+# (read from tg_input_devices.json) equals the compile device
+pythonpath_string = 'PYTHONPATH="${PYTHONPATH}:' + env.Dir("#tinygrad_repo").abspath + '"'
+
+def probe_devices():
+  return set(subprocess.run(
+    [sys.executable, '-c', 'from tinygrad import Device\nprint("\\n".join(Device.get_available_devices()))'],
+    capture_output=True, text=True, check=True).stdout.strip().splitlines())
+
+available = probe_devices()
+override_backend = os.environ.get('MODELD_TG_BACKEND')
+if override_backend:
+  tg_backend = override_backend
+  tg_flags = f'DEV={tg_backend}'
+elif 'CUDA' in available:
+  tg_backend = 'CUDA'
+  tg_flags = f'DEV={tg_backend}'
+elif 'QCOM' in available:
+  tg_backend = 'QCOM'
+  tg_flags = f'DEV={tg_backend} IMAGE=1 FLOAT16=1 NOLOCALS=1 JIT_BATCH_SIZE=0 OPENPILOT_HACKS=1'
+elif 'CL' in available:
+  tg_backend = 'CL'
+  tg_flags = f'DEV={tg_backend} IMAGE=2 FLOAT16=1 NOLOCALS=1 JIT_BATCH_SIZE=0 OPENPILOT_HACKS=1'
+else:
+  tg_backend = 'CPU'
+  tg_flags = f'DEV=CPU' if arch == 'Darwin' else 'DEV=CPU:LLVM'
+
+for model_name in ['driving_vision', 'driving_policy', 'dmonitoring_model']:
+  fn = File(f"models/{model_name}").abspath
+  cmd = f'{pythonpath_string} {tg_flags} python3 {Dir("#tinygrad_repo").abspath}/examples/openpilot/compile3.py {fn}.onnx {fn}_tinygrad.pkl'
+  lenv.Command(fn + "_tinygrad.pkl", [fn + ".onnx"] + tinygrad_files, cmd)
+

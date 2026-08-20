@@ -119,6 +119,8 @@ procs = [
   PythonProcess("timed", "system.timed", always_run, enabled=not PC),
 
   PythonProcess("modeld", "selfdrive.modeld.modeld", only_onroad),
+  # legacy split modeld (old arch), kept for tests; disabled so manager never auto-starts it
+  PythonProcess("modeld098", "selfdrive.modeld098.modeld", only_onroad, enabled=False),
   # PythonProcess("dmonitoringmodeld", "selfdrive.modeld.dmonitoringmodeld", driverview, enabled=(WEBCAM or not PC)),
 
   PythonProcess("sensord", "system.sensord.sensord", only_onroad, enabled=not PC),

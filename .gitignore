@@ -74,6 +74,7 @@ comma*.sh
 
 selfdrive/modeld/models/*.pkl*
 selfdrive/modeld/models/tg_input_devices.json
+selfdrive/modeld098/models/*.pkl*
 sunnypilot/modeld*/thneed/compile
 sunnypilot/modeld*/models/*.thneed
 sunnypilot/modeld*/models/*.pkl

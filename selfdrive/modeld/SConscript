@@ -65,6 +65,15 @@ tg_devices = { # which device to put jit inputs to at runtime
   'selfdrive.modeld.dmonitoringmodeld': {
     'default': {'DEV': tg_backend}
   },
+  # legacy split modeld (selfdrive/modeld098), compiled with the same flags above
+  'selfdrive.modeld098.modeld': {
+    'default': {'DEV': tg_backend},
+    'usbgpu': {'DEV': tg_backend}
+  },
+  'selfdrive.modeld098.dmonitoringmodeld': {
+    'default': {'DEV': tg_backend},
+    'usbgpu': {'DEV': tg_backend}
+  },
 }
 
 USBGPU = usbgpu_present() # or release # TODO always build big model on release
